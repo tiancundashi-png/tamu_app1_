@@ -1,0 +1,24 @@
+# じゃんけんゲーム
+import random
+
+print('じゃんけんゲーム')
+print('0:グー')
+print('1:チョキ')
+print('2:パー')
+
+yourchoice = int(input('選んでください > '))
+if yourchoice not in [0, 1, 2]:
+    print('0, 1, 2のいずれかを入力してください')
+    raise SystemExit
+
+computerchoice = random.randint(0, 2)
+
+hands = ['グー', 'チョキ', 'パー']
+print('コンピュータは' + hands[computerchoice] + 'を出しました')
+
+if yourchoice == computerchoice:
+    print('あいこです')
+elif (yourchoice == 0 and computerchoice == 1) or (yourchoice == 1 and computerchoice == 2) or (yourchoice == 2 and computerchoice == 0):
+    print('あなたの勝ちです')
+else:
+    print('あなたの負けです')
