@@ -1,0 +1,27 @@
+print('電卓アプリ')
+print('1 : 足し算')
+print('2 : 引き算')
+print('3 : 掛け算')
+print('4 : 割り算')
+
+choice = input('計算方法を選んでください (1-4) > ')
+if choice not in ['1', '2', '3', '4']:
+    print('1から4の番号を入力してください')
+    raise SystemExit
+
+a = float(input('1つ目の数字 > '))
+b = float(input('2つ目の数字 > '))
+
+if choice == '1':
+    result = a + b 
+elif choice == '2':
+    result = a - b 
+elif choice == '3':
+    result = a * b
+else:
+    if b == 0:
+        print('0で割ることはできません')
+    else:
+        result = a / b
+
+print(f'結果: {result}')
