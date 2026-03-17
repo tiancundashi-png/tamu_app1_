@@ -1,0 +1,11 @@
+print('パスワード生成プログラム')
+length = int(input('長さを入力してください: '))
+symbol = input('記号を含めますか (y/n): ')
+print('生成されたパスワード: ')
+import string
+import random
+characters = string.ascii_letters + string.digits
+passward =''
+for i in range(length):
+    passward += random.choice(characters)
+print(passward)
