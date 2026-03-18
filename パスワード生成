@@ -4,7 +4,10 @@ symbol = input('記号を含めますか (y/n): ')
 print('生成されたパスワード: ')
 import string
 import random
-characters = string.ascii_letters + string.digits
+if symbol.lower() == 'y':
+    characters = string.ascii_letters + string.digits + string.punctuation
+else:
+    characters = string.ascii_letters + string.digits
 passward =''
 for i in range(length):
     passward += random.choice(characters)
