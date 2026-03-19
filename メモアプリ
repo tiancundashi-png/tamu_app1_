@@ -1,0 +1,51 @@
+print('メモアプリ')
+while True:
+    print('1 : メモを追加')
+    print('2 : メモ一覧')
+    print('3 : メモ削除')
+    print('4 : 終了')
+    choice = input('番号を入力してください: ')
+    if choice == '1':
+        memo = input('メモを入力してください:')
+#「ファイルを開いて、そのブロックが終わったら自動で閉じる」ための構文です。
+        with open('memos.txt', 'a', encoding='utf-8') as f:
+        #ファイルにメモを書き込む
+            f.write(memo + '\n')
+            print(memo + ' を保存しました')
+    elif choice == '2':
+        print('メモ一覧')
+#読み取り専用でファイルを開く
+        with open('memos.txt', 'r') as f:
+#open関数で開いたファイルオブジェクトから、readlinesメソッドを使って全ての行をリストとして読み取る
+            memos = f.readlines()
+        #各メモを番号付きで表示する
+            for i, memo in enumerate(memos, start=1):
+            #memoの前後の空白を削除して表示する
+                print(f'{i}. {memo.strip()}')
+    elif choice == '3':
+        print('メモ削除')
+    
+        try:
+            input_number = int(input('削除する番号を入力: '))
+        except ValueError:
+            print('数字を入力してください')
+            continue
+    # ファイルから全メモを読み込み、選択した番号を削除して書き戻す
+            with open('memos.txt', 'r', encoding='utf-8') as f:
+                memos = f.readlines()
+        #入力された番号が有効な範囲内か確認し、削除処理を行う
+            if 1 <= input_number <= len(memos):
+                deleted = memos.pop(input_number - 1)
+                with open('memos.txt', 'w', encoding='utf-8') as f:
+            #変更後のメモリストをファイルに書き戻す
+                    f.writelines(memos)
+            #削除したメモを表示する
+                print(f'{input_number}番のメモを削除しました: {deleted.strip()}')
+            else:
+                print('その番号のメモはありません')
+    elif choice == '4':
+        print('終了します')
+        break
+    else:
+        print('無効な選択です')            
+                        
