@@ -39,14 +39,15 @@ while True:
             print('正しい番号を入力してください')
             continue
         removed = tasks.pop(task_number - 1)
-        print(f'{removed} を削除しました')
+        print(f'{removed["task"]} を削除しました')
     elif choice == '4':
         if len(tasks) == 0:
             print('完了にできるタスクがありません')
             continue
         print('現在のタスク:')
         for i, task in enumerate(tasks, start=1):
-            print(f'{i}. {task}') 
+            status = "✓" if task["done"] else " "
+            print(f'{i}. [{status}] {task["task"]}')
         try:      
             task_number = int(input('完了にする番号を選んでください> '))
         except ValueError:
