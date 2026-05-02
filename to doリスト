@@ -1,6 +1,49 @@
+from pathlib import Path
+
+
+# このプログラムと同じ場所にある tasks.txt を使う
+TASKS_FILE = Path(__file__).with_name('tasks.txt')
+
+
+def load_tasks(file_path):
+    # ファイルから読み込んだタスクを入れるリスト
+    loaded_tasks = []
+    # ファイルがまだ無いときは、空のままで開始する
+    if not file_path.exists():
+        return loaded_tasks
+
+    with file_path.open('r', encoding='utf-8') as file:
+        for line in file:
+            line = line.rstrip('\n')
+            if not line:
+                continue
+
+            # 1行を「完了状態」と「タスク内容」に分ける
+            if '\t' in line:
+                done_text, task_text = line.split('\t', 1)
+            else:
+                done_text, task_text = '0', line
+
+            # 辞書の形にして、リストへ追加する
+            loaded_tasks.append({'task': task_text, 'done': done_text == '1'})
+
+    return loaded_tasks
+
+
+def save_tasks(file_path, tasks):
+    with file_path.open('w', encoding='utf-8') as file:
+        for task in tasks:
+            # 完了なら1、未完了なら0として保存する
+            done_text = '1' if task['done'] else '0'
+            file.write(f"{done_text}\t{task['task']}\n")
+
+
+# ToDoリスト管理アプリ：タスクの追加、表示、削除、完了チェックができます
+
 print('ToDoリスト')
 
-tasks = []
+# 起動したときに tasks.txt を読み込む
+tasks = load_tasks(TASKS_FILE)
 
 while True:
     print('\n1 : タスク追加')
@@ -27,9 +70,11 @@ while True:
             print('削除できるタスクがありません')
             continue
         print('現在のタスク:')
+        #タスクの番号と完了状態を表示
         for i, task in enumerate(tasks, start=1):
             status = "✓" if task["done"] else " "
             print(f'{i}. [{status}] {task["task"]}')
+            #削除するタスクの番号を入力(例外処理付き)して、タスクを削除
         try:      
             task_number = int(input('削除する番号を選んでください> '))
         except ValueError:
@@ -38,6 +83,7 @@ while True:
         if task_number < 1 or task_number > len(tasks):
             print('正しい番号を入力してください')
             continue
+        #タスクを削除して、削除したタスクを表示
         removed = tasks.pop(task_number - 1)
         print(f'{removed["task"]} を削除しました')
     elif choice == '4':
@@ -56,11 +102,14 @@ while True:
         if task_number < 1 or task_number > len(tasks):
             print('正しい番号を入力してください')
             continue
+        #タスクを完了にして、完了にしたタスクを表示
         tasks[task_number - 1]["done"] = True
         print('タスクを完了にしました')
         for i, task in enumerate(tasks, start=1):
             status = "✓" if task["done"] else " "
             print(f'{i}. [{status}] {task["task"]}')       
     elif choice == '5':
+        # 終了する前に、今のタスクをファイルへ保存する
+        save_tasks(TASKS_FILE, tasks)
         print('終了します')
         break   
