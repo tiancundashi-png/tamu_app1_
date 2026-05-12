@@ -1,3 +1,4 @@
+#pathlib を使うと、ファイルのパスを簡単に扱えるようになります
 from pathlib import Path
 
 
@@ -14,13 +15,15 @@ def load_tasks(file_path):
 
     with file_path.open('r', encoding='utf-8') as file:
         for line in file:
+            # 行末の改行を削除して、空行は無視する
             line = line.rstrip('\n')
             if not line:
                 continue
 
-            # 1行を「完了状態」と「タスク内容」に分ける
+            # 1行を「完了状態」と「タスク内容」に分ける(タブ区切り)一回だけ`\t`(タブ文字)
             if '\t' in line:
                 done_text, task_text = line.split('\t', 1)
+            # 完了状態は '1' なら完了、'0' なら未完了とする(エラー対策）
             else:
                 done_text, task_text = '0', line
 
@@ -31,10 +34,12 @@ def load_tasks(file_path):
 
 
 def save_tasks(file_path, tasks):
+    #with構文を使うと、ファイルのクローズを自動で行ってくれるので便利です
     with file_path.open('w', encoding='utf-8') as file:
         for task in tasks:
             # 完了なら1、未完了なら0として保存する
             done_text = '1' if task['done'] else '0'
+            # タスクの内容と完了状態をタブで区切って保存する
             file.write(f"{done_text}\t{task['task']}\n")
 
 
@@ -45,6 +50,7 @@ print('ToDoリスト')
 # 起動したときに tasks.txt を読み込む
 tasks = load_tasks(TASKS_FILE)
 
+#無限ループで、ユーザーの選択を待ちます
 while True:
     print('\n1 : タスク追加')
     print('2 : タスク表示')
@@ -56,12 +62,14 @@ while True:
     if choice == '1':
         task = input('追加するタスクを入力してください> ')
         tasks.append({"task": task, "done": False})
+        #f`文字列を使うと、変数を簡単に文字列の中に埋め込むことができます`
         print(f'{task} を追加しました')
     elif choice == '2':
         print('現在のタスク:')
         if len(tasks) == 0:
             print('タスクがありません')
         else:
+            #タスクの番号と完了状態を表示
             for i, task in enumerate(tasks, start=1):
                 status = "✓" if task["done"] else " "
                 print(f'{i}. [{status}] {task["task"]}')
@@ -74,7 +82,7 @@ while True:
         for i, task in enumerate(tasks, start=1):
             status = "✓" if task["done"] else " "
             print(f'{i}. [{status}] {task["task"]}')
-            #削除するタスクの番号を入力(例外処理付き)して、タスクを削除
+            #削除するタスクの番号を入力(例外処理付き)して、タスクを削除(try-exceptで、数字以外が入力されたときのエラーを防ぐ)して、削除したタスクを表示
         try:      
             task_number = int(input('削除する番号を選んでください> '))
         except ValueError:
