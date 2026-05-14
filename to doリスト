@@ -49,7 +49,11 @@ print('ToDoリスト')
 
 # 起動したときに tasks.txt を読み込む
 tasks = load_tasks(TASKS_FILE)
-
+def display_tasks(tasks):
+    print('現在のタスク:')
+    for i, task in enumerate(tasks, start=1):
+        status = "✓" if task["done"] else " "
+        print(f'{i}. [{status}] {task["task"]}') 
 #無限ループで、ユーザーの選択を待ちます
 while True:
     print('\n1 : タスク追加')
@@ -61,28 +65,34 @@ while True:
 
     if choice == '1':
         task = input('追加するタスクを入力してください> ')
+        if not task:
+            print('タスク名を入力してください')
+            continue
         tasks.append({"task": task, "done": False})
         #f`文字列を使うと、変数を簡単に文字列の中に埋め込むことができます`
         print(f'{task} を追加しました')
+        try:    
+            save_tasks(TASKS_FILE, tasks)  # タスクを追加したらすぐに保存する 
+            print('タスクを保存しました')
+        except OSError as e:
+            print('保存に失敗しました')
+            print(f'エラー: {e}') 
+ 
+            #タスクの表示         
     elif choice == '2':
-        print('現在のタスク:')
         if len(tasks) == 0:
             print('タスクがありません')
-        else:
-            #タスクの番号と完了状態を表示
-            for i, task in enumerate(tasks, start=1):
-                status = "✓" if task["done"] else " "
-                print(f'{i}. [{status}] {task["task"]}')
+        else:    
+            display_tasks(tasks)
+            
+            #タスクの削除
     elif choice == '3':
         if len(tasks) == 0:
             print('削除できるタスクがありません')
             continue
         print('現在のタスク:')
-        #タスクの番号と完了状態を表示
-        for i, task in enumerate(tasks, start=1):
-            status = "✓" if task["done"] else " "
-            print(f'{i}. [{status}] {task["task"]}')
-            #削除するタスクの番号を入力(例外処理付き)して、タスクを削除(try-exceptで、数字以外が入力されたときのエラーを防ぐ)して、削除したタスクを表示
+        display_tasks(tasks)
+                #削除するタスクの番号を入力(例外処理付き)して、タスクを削除(try-exceptで、数字以外が入力されたときのエラーを防ぐ)して、削除したタスクを表示
         try:      
             task_number = int(input('削除する番号を選んでください> '))
         except ValueError:
@@ -91,17 +101,16 @@ while True:
         if task_number < 1 or task_number > len(tasks):
             print('正しい番号を入力してください')
             continue
-        #タスクを削除して、削除したタスクを表示
+            #タスクを削除して、削除したタスクを表示
         removed = tasks.pop(task_number - 1)
-        print(f'{removed["task"]} を削除しました')
+        print(f'{removed["task"]} を削除しました') 
     elif choice == '4':
         if len(tasks) == 0:
             print('完了にできるタスクがありません')
             continue
         print('現在のタスク:')
-        for i, task in enumerate(tasks, start=1):
-            status = "✓" if task["done"] else " "
-            print(f'{i}. [{status}] {task["task"]}')
+        display_tasks(tasks)
+             #完了にするタスクの番号を入力(try-exceptで、数字以外が入力されたときのエラーを防ぐ)して、完了にしたタスクを表示
         try:      
             task_number = int(input('完了にする番号を選んでください> '))
         except ValueError:
@@ -110,14 +119,12 @@ while True:
         if task_number < 1 or task_number > len(tasks):
             print('正しい番号を入力してください')
             continue
-        #タスクを完了にして、完了にしたタスクを表示
+            #タスクを完了にして、完了にしたタスクを表示
         tasks[task_number - 1]["done"] = True
         print('タスクを完了にしました')
-        for i, task in enumerate(tasks, start=1):
-            status = "✓" if task["done"] else " "
-            print(f'{i}. [{status}] {task["task"]}')       
+        display_tasks(tasks)  
     elif choice == '5':
-        # 終了する前に、今のタスクをファイルへ保存する
+            # 終了する前に、今のタスクをファイルへ保存する
         save_tasks(TASKS_FILE, tasks)
         print('終了します')
         break   
