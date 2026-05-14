@@ -50,6 +50,9 @@ print('ToDoリスト')
 # 起動したときに tasks.txt を読み込む
 tasks = load_tasks(TASKS_FILE)
 def display_tasks(tasks):
+    if len(tasks) == 0:
+        print('タスクがありません')
+        return
     print('現在のタスク:')
     for i, task in enumerate(tasks, start=1):
         status = "✓" if task["done"] else " "
@@ -59,12 +62,12 @@ while True:
     print('\n1 : タスク追加')
     print('2 : タスク表示')
     print('3 : タスク削除')
-    print('4 : 完了にする')
+    print('4 : 完了状態を変更する')
     print('5 : 終了')
     choice = input('選択してください> ')
 
     if choice == '1':
-        task = input('追加するタスクを入力してください> ')
+        task = input('追加するタスクを入力してください> ').strip()  # 前後の空白を削除する
         if not task:
             print('タスク名を入力してください')
             continue
@@ -104,6 +107,7 @@ while True:
             #タスクを削除して、削除したタスクを表示
         removed = tasks.pop(task_number - 1)
         print(f'{removed["task"]} を削除しました') 
+        save_tasks(TASKS_FILE, tasks)  # タスクを削除したらすぐに保存する
     elif choice == '4':
         if len(tasks) == 0:
             print('完了にできるタスクがありません')
@@ -112,7 +116,7 @@ while True:
         display_tasks(tasks)
              #完了にするタスクの番号を入力(try-exceptで、数字以外が入力されたときのエラーを防ぐ)して、完了にしたタスクを表示
         try:      
-            task_number = int(input('完了にする番号を選んでください> '))
+            task_number = int(input('完了状態を変更する番号を選んでください> '))
         except ValueError:
             print('数字を入力してください')
             continue
@@ -120,8 +124,9 @@ while True:
             print('正しい番号を入力してください')
             continue
             #タスクを完了にして、完了にしたタスクを表示
-        tasks[task_number - 1]["done"] = True
-        print('タスクを完了にしました')
+        tasks[task_number - 1]['done'] = not tasks[task_number - 1]['done']  # 完了状態を反転させる
+        print('完了状態を変更しました')
+        save_tasks(TASKS_FILE, tasks)  # タスクを完了にしたらすぐに保存する
         display_tasks(tasks)  
     elif choice == '5':
             # 終了する前に、今のタスクをファイルへ保存する
