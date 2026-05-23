@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>シフト入力フォーム</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>シフト入力フォーム</h1>
+
+    <form method="POST">
+
+    <div class="form-group">
+        <label>名前</label>
+        <input type="text" name="name">
+    </div>
+
+    <div class="form-group">
+        <label>日付</label>
+        <input type="date" name="date">
+    </div>
+
+    <div class="form-group">
+        <label>時間</label>
+        <input type="time" name="time">
+    </div>
+
+    <button type="submit">送信</button>
+
+</form>
+
+    {% for shift in shifts %}
+
+<div class="shift-card">
+
+    <p>名前：{{ shift.name }}</p>
+    <p>日付：{{ shift.date }}</p>
+    <p>時間：{{ shift.time }}</p>
+
+    <form action="/delete/{{ shift.id }}" method="POST">
+        <button class="delete-button" type="submit">
+            削除
+        </button>
+    </form>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>
