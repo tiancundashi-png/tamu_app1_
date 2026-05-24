@@ -81,3 +81,7 @@ button {
 
     width: 100%;
 }
+.form-group {
+
+    flex: 1;
+}
