@@ -1,15 +1,38 @@
-// htmlのclass="delete-button"の要素を取得
-const deleteButtons = document.querySelectorAll(".delete-button");
-// 取得した要素に対してループ処理
-deleteButtons.forEach((button) => {
-// ボタンがクリックされたときのイベントリスナーを追加
-    button.addEventListener("click", (event) => {
-// OK / キャンセルを出す
-        const result = confirm("本当に削除しますか？");
+const form = document.querySelector("#shift-form");
 
-        if (!result) {
-// キャンセルされた場合、デフォルトのフォーム送信を防止
-            event.preventDefault();
-        }
-    });
+const nameInput = document.querySelector("#name-input");
+
+const dateInput = document.querySelector("#date-input");
+
+const timeInput = document.querySelector("#time-input");
+
+const errorMessage = document.querySelector("#error-message");
+
+form.addEventListener("submit", (event) => {
+
+    if (
+        nameInput.value.trim() === "" ||
+        dateInput.value.trim() === "" ||
+        timeInput.value.trim() === ""
+    ) {
+
+        event.preventDefault();
+
+        errorMessage.textContent = "すべて入力してください";
+    }
+});
+
+nameInput.addEventListener("input", () => {
+
+    errorMessage.textContent = "";
+});
+
+dateInput.addEventListener("input", () => {
+
+    errorMessage.textContent = "";
+});
+
+timeInput.addEventListener("input", () => {
+
+    errorMessage.textContent = "";
 });
