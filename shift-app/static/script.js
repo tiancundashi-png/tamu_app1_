@@ -36,3 +36,20 @@ timeInput.addEventListener("input", () => {
 
     errorMessage.textContent = "";
 });
+const deleteForms = document.querySelectorAll(".delete-form");
+
+deleteForms.forEach((form) => {
+
+    form.addEventListener("submit", (event) => {
+
+        const result = confirm("本当に削除しますか？");
+
+        if (!result) {
+
+            event.preventDefault();
+
+        }
+
+    });
+
+});
