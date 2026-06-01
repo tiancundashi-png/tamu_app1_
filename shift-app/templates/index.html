@@ -50,13 +50,17 @@
         <p>日付：{{ shift.date }}</p>
         <p>時間：{{ shift.time }}</p>
 
-        <form action="/delete/{{ shift.id }}" method="POST">
+        <a href="/edit/{{ shift.id }}">
+    編集
+</a>
 
-            <button class="delete-button" type="submit">
-                削除
-            </button>
+<form action="/delete/{{ shift.id }}" method="POST" class="delete-form">
 
-        </form>
+    <button class="delete-button" type="submit">
+        削除
+    </button>
+
+</form>
 
     </div>
 
