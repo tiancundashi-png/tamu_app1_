@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ユーザー登録</title>
+</head>
+<body>
+
+    <h1>ユーザー登録</h1>
+
+    <form action="/register" method="POST">
+
+        <label>ユーザー名</label>
+        <input type="text" name="username">
+
+        <br><br>
+
+        <label>パスワード</label>
+        <input type="password" name="password">
+
+        <br><br>
+
+        <button type="submit">登録</button>
+
+    </form>
+    <!-- errorが渡された時だけ表示 -->
+{% if error %}
+　　<p>{{ error }}</p>
+{% endif %}
+
+</body>
+</html>
