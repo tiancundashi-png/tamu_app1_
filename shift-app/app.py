@@ -359,6 +359,14 @@ def admin():
         FROM shifts
         JOIN users
         ON shifts.user_id = users.id
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM confirmed_shifts
+            WHERE confirmed_shifts.user_id = shifts.user_id
+              AND confirmed_shifts.date = shifts.date
+              AND confirmed_shifts.time = shifts.time
+              AND confirmed_shifts.end_time = shifts.end_time
+        )
         ORDER BY shifts.date
         """
     )
