@@ -173,7 +173,7 @@ def edit(id):
     # ログイン中のユーザーのシフトだけ取得
     cursor.execute(
         """
-        SELECT id, name, date, time
+        SELECT id, name, date, time, end_time
         FROM shifts
         WHERE id = ?
           AND user_id = ?
@@ -191,6 +191,7 @@ def edit(id):
         "name": row[1],
         "date": row[2],
         "time": row[3],
+        "end_time": row[4]
     }
 
     return render_template("edit.html", shift=shift)
@@ -205,6 +206,7 @@ def update(id):
     name = request.form["name"]
     date = request.form["date"]
     time = request.form["time"]
+    end_time = request.form["end_time"]
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -212,11 +214,11 @@ def update(id):
     cursor.execute(
         """
         UPDATE shifts
-        SET name = ?, date = ?, time = ?
+        SET name = ?, date = ?, time = ?, end_time = ?
         WHERE id = ?
           AND user_id = ?
         """,
-        (name, date, time, id, session["user_id"]),
+        (name, date, time, end_time, id, session["user_id"]),
     )
     conn.commit()
     conn.close()
