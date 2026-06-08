@@ -24,7 +24,7 @@
 
 <form method="POST" id="shift-form">
 
-    <form method="POST" id="shift-form">
+    
 
         <div class="form-row">
 
@@ -41,6 +41,8 @@
             <div class="form-group">
                 <label>時間</label>
                 <input type="time" name="time" id="time-input">
+                <label>終了時間</label>
+                <input type="time" name="end_time" required>
             </div>
 
         </div>
@@ -57,7 +59,7 @@
 
         <p>名前：{{ shift.name }}</p>
         <p>日付：{{ shift.date }}</p>
-        <p>時間：{{ shift.time }}</p>
+        <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
 
         <a href="/edit/{{ shift.id }}">
     編集

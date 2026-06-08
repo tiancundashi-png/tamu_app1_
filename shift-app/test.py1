@@ -1,0 +1,14 @@
+import sqlite3
+
+conn = sqlite3.connect("shift.db")
+cursor = conn.cursor()
+
+cursor.execute(
+    "UPDATE users SET role = 'admin' WHERE id = ?",
+    (6,),
+)
+
+conn.commit()
+conn.close()
+
+print("admin化完了")

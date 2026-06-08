@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>管理者ページ</title>
+</head>
+<body>
+
+    <h1>全従業員のシフト希望</h1>
+
+    {% for shift in shifts %}
+
+        <p>
+            ユーザー名：{{ shift.username }}
+        </p>
+
+        <p>
+            日付：{{ shift.date }}
+        </p>
+
+        <p>
+            時間：{{ shift.time }} ～ {{ shift.end_time }}
+        </p>
+
+        <p>
+            <a href="/confirm_shift/{{ shift.id }}">このシフトを確定する</a>
+        </p>
+
+        <hr>
+
+    {% endfor %}
+
+</body>
+</html>

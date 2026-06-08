@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>確定シフト一覧</title>
+</head>
+<body>
+
+    <h1>確定シフト一覧</h1>
+
+    {% for shift in shifts %}
+
+        <p>ユーザー名：{{ shift.username }}</p>
+        <p>日付：{{ shift.date }}</p>
+        <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
+        <hr>
+
+    {% endfor %}
+
+    <p>
+        <a href="/admin">管理者ページに戻る</a>
+    </p>
+
+</body>
+</html>

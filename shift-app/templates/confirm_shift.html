@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>シフト確定確認</title>
+</head>
+<body>
+
+    <h1>シフト確定確認</h1>
+
+    <p>以下のシフトを確定しますか？</p>
+
+    <ul>
+        <li>ユーザー名：{{ shift.username }}</li>
+        <li>日付：{{ shift.date }}</li>
+        <li>時間：{{ shift.time }} ～ {{ shift.end_time }}</li>
+    </ul>
+
+    <form action="/confirm_shift/{{ shift.id }}" method="POST">
+        <button type="submit">確定する</button>
+    </form>
+
+    <p>
+        <a href="/admin">管理者ページに戻る</a>
+    </p>
+
+</body>
+</html>

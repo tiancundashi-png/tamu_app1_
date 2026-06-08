@@ -1,0 +1,17 @@
+ <h1>自分の確定シフト</h1>
+
+    {% for shift in shifts %}
+
+        <p>日付：{{ shift.date }}</p>
+        <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
+
+        <hr>
+
+    {% endfor %}
+
+    <p>
+        <a href="/">トップページに戻る</a>
+    </p>
+
+</body>
+</html>

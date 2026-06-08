@@ -36,8 +36,9 @@ timeInput.addEventListener("input", () => {
 
     errorMessage.textContent = "";
 });
+// 削除確認のコード
 const deleteForms = document.querySelectorAll(".delete-form");
-
+// 削除フォームに対してイベントリスナーを追加(一つずつ)して、削除確認のダイアログを表示する
 deleteForms.forEach((form) => {
 
     form.addEventListener("submit", (event) => {
