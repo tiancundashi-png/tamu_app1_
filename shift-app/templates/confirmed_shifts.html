@@ -13,6 +13,11 @@
         <p>ユーザー名：{{ shift.username }}</p>
         <p>日付：{{ shift.date }}</p>
         <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
+
+        <form action="/unconfirm_shift/{{ shift.id }}" method="POST">
+            <button type="submit">取消</button>
+        </form>
+        
         <hr>
 
     {% endfor %}

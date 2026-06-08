@@ -585,6 +585,31 @@ def my_confirmed_shifts():
 
     return render_template("my_confirmed_shifts.html", shifts=shifts)
 
+@app.route("/unconfirm_shift/<int:id>", methods=["POST"])
+def unconfirm_shift(id):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM confirmed_shifts
+        WHERE id = ?
+        """,
+        (id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/confirmed_shifts")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
