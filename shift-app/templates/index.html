@@ -17,6 +17,16 @@
 
 <p>こんにちは、{{ username }}さん</p>
 
+{% if is_admin_user %}
+    <p>
+        <a href="/admin">管理者ページ</a>
+    </p>
+
+    <p>
+        <a href="/confirmed_shifts">確定シフト一覧</a>
+    </p>
+{% endif %}
+
 <!-- ログアウトボタン -->
 <form action="/logout">
     <button type="submit">ログアウト</button>

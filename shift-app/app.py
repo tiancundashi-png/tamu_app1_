@@ -92,7 +92,7 @@ def home():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT username FROM users WHERE id = ?",
+        "SELECT username, role FROM users WHERE id = ?",
         (session["user_id"],),
     )
     user = cursor.fetchone()
@@ -159,6 +159,7 @@ def home():
         "index.html",
         shifts=shifts,
         username=user[0],
+        is_admin_user=(user[1] == "admin"),
     )
 
 
