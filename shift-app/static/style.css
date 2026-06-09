@@ -93,3 +93,101 @@ button {
 
     font-weight: bold;
 }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+h1 {
+    margin-top: 0;
+    color: #333;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+
+.shift-card {
+    background-color: #f9fafb;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.delete-button {
+    background-color: #dc2626;
+}
+
+.delete-button:hover {
+    background-color: #b91c1c;
+}
+.menu-link {
+    display: inline-block;
+    padding: 10px 16px;
+    background: #eef4ff;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.menu-link {
+    display: inline-block;
+    padding: 10px 16px;
+    background-color: #eef4ff;
+    color: #2563eb;
+    border-radius: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.menu-link:hover {
+    background-color: #dbeafe;
+    text-decoration: none;
+}
