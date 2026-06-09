@@ -90,3 +90,10 @@ python app.py
 以下のURLへアクセスしてください。
 
 http://127.0.0.1:5001
+## 画面イメージ
+
+![トップページ](images/home.png)
+
+![管理者ページ](images/admin.png)
+
+![確定シフト一覧](images/confirmed.png)
