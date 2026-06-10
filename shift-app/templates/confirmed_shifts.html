@@ -8,20 +8,36 @@
 
     <h1>確定シフト一覧</h1>
 
-    {% for shift in shifts %}
+    {% if shifts|length == 0 %}
+        <p>確定済みのシフトはありません。</p>
+    {% else %}
 
-        <p>ユーザー名：{{ shift.username }}</p>
-        <p>日付：{{ shift.date }}</p>
-        <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>日付</th>
+                <th>ユーザー名</th>
+                <th>勤務時間</th>
+                <th>操作</th>
+            </tr>
+        </thead>
 
-        <form action="/unconfirm_shift/{{ shift.id }}" method="POST">
-            <button type="submit">取消</button>
-        </form>
-        
-        <hr>
-
-    {% endfor %}
-
+        <tbody>
+            {% for shift in shifts %}
+            <tr>
+                <td>{{ shift.date }}</td>
+                <td>{{ shift.username }}</td>
+                <td>{{ shift.time }} ～ {{ shift.end_time }}</td>
+                <td>
+                    <form action="/unconfirm_shift/{{ shift.id }}" method="POST">
+                        <button type="submit">取消</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
     <p>
         <a href="/admin">管理者ページに戻る</a>
     </p>

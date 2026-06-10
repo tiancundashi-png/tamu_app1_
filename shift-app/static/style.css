@@ -191,3 +191,26 @@ button:hover {
     background-color: #dbeafe;
     text-decoration: none;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+}
+
+th,
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #eef4ff;
+    color: #333;
+}
+
+tr:hover {
+    background-color: #f9fafb;
+}
