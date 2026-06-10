@@ -51,6 +51,32 @@ def init_db():
         )
         """
     )
+     # 初回起動時に管理者ユーザーを作成
+    cursor.execute(
+        """
+        SELECT id
+        FROM users
+        WHERE username = ?
+        """,
+        ("admin",)
+    )
+
+    admin_user = cursor.fetchone()
+
+    if admin_user is None:
+        admin_password = generate_password_hash("admin123")
+
+        cursor.execute(
+            """
+            INSERT INTO users (
+                username,
+                password,
+                role
+            )
+            VALUES (?, ?, ?)
+            """,
+            ("admin", admin_password, "admin")
+        )
 
     conn.commit()
     conn.close()
