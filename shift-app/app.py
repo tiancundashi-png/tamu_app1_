@@ -344,33 +344,60 @@ def admin():
 
     if not is_admin():
         return redirect("/")
+    
+    selected_date = request.args.get("date")
 
     conn = get_db_connection()
     cursor = conn.cursor()
     # 全ユーザーのシフトを取得
-    cursor.execute(
-        """
-        SELECT
-            shifts.id,
-            users.username,
-            shifts.date,
-            shifts.time,
-            shifts.end_time
-        FROM shifts
-        JOIN users
-        ON shifts.user_id = users.id
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM confirmed_shifts
-            WHERE confirmed_shifts.user_id = shifts.user_id
-              AND confirmed_shifts.date = shifts.date
-              AND confirmed_shifts.time = shifts.time
-              AND confirmed_shifts.end_time = shifts.end_time
+    if selected_date:
+        cursor.execute(
+            """
+            SELECT
+                shifts.id,
+                users.username,
+                shifts.date,
+                shifts.time,
+                shifts.end_time
+            FROM shifts
+            JOIN users
+            ON shifts.user_id = users.id
+            WHERE shifts.date = ?
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM confirmed_shifts
+                WHERE confirmed_shifts.user_id = shifts.user_id
+                    AND confirmed_shifts.date = shifts.date
+                    AND confirmed_shifts.time = shifts.time
+                    AND confirmed_shifts.end_time = shifts.end_time
+            )
+            ORDER BY shifts.date
+            """,
+            (selected_date,)
         )
-        ORDER BY shifts.date
-        """
-    )
-
+    else:
+        cursor.execute(
+            """
+            SELECT
+                shifts.id,
+                users.username,
+                shifts.date,
+                shifts.time,
+                shifts.end_time
+            FROM shifts
+            JOIN users
+            ON shifts.user_id = users.id
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM confirmed_shifts
+                WHERE confirmed_shifts.user_id = shifts.user_id
+                  AND confirmed_shifts.date = shifts.date
+                  AND confirmed_shifts.time = shifts.time
+                  AND confirmed_shifts.end_time = shifts.end_time
+            )
+            ORDER BY shifts.date
+            """
+        )
     shifts = [
         {
             "id": row[0],
@@ -387,6 +414,7 @@ def admin():
     return render_template(
         "admin.html",
         shifts=shifts,
+        selected_date=selected_date,
     )
 @app.route("/logout")
 def logout():

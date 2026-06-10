@@ -7,6 +7,23 @@
 <body>
 
     <h1>全従業員のシフト希望</h1>
+    <form method="GET" action="/admin">
+
+    <label>日付で絞り込み</label>
+
+    <input
+        type="date"
+        name="date"
+        value="{{ selected_date }}"
+    >
+
+    <button type="submit">
+        検索
+    </button>
+
+</form>
+
+<hr>
 
     <p>
     <a href="/confirmed_shifts">確定シフト一覧を見る</a>
