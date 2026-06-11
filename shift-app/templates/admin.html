@@ -9,6 +9,20 @@
     <h1>全従業員のシフト希望</h1>
     <form method="GET" action="/admin">
 
+        <label>日付で絞り込み</label>
+
+        <input
+            type="date"
+            name="date"
+            value="{{ selected_date }}"
+        >
+
+        <button type="submit">
+            検索
+        </button>
+
+    <form method="GET" action="/admin">
+
     <label>日付で絞り込み</label>
 
     <input
@@ -22,6 +36,8 @@
     </button>
 
 </form>
+
+<hr></form>
 
 <hr>
 
