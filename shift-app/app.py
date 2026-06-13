@@ -1,3 +1,4 @@
+from flask_wtf.csrf import CSRFProtect
 # 日付や日時計算を行うためのライブラリ
 from datetime import datetime, timedelta
 # パスワードを安全に保存するためのハッシュ化機能
@@ -14,6 +15,7 @@ DATABASE = "shift.db"
 app = Flask(__name__)
 # セッション機能に使用する秘密鍵
 app.secret_key = "shift_app_secret"
+csrf = CSRFProtect(app)
 
 
 def init_db():

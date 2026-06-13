@@ -30,6 +30,7 @@
                 <td>{{ shift.time }} ～ {{ shift.end_time }}</td>
                 <td>
                     <form action="/unconfirm_shift/{{ shift.id }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit">取消</button>
                     </form>
                 </td>

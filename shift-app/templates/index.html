@@ -38,6 +38,8 @@
 
 <form method="POST" id="shift-form">
 
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     
 
         <div class="form-row">
@@ -83,6 +85,7 @@
 </a>
 
 <form action="/delete/{{ shift.id }}" method="POST" class="delete-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <button class="delete-button" type="submit">
         削除

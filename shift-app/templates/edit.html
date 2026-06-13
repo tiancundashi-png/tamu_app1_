@@ -15,6 +15,7 @@
 <h1>シフト編集</h1>
 
 <form action="/update/{{ shift.id }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="form-group">
         <label>名前</label>
