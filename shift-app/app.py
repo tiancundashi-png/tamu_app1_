@@ -13,6 +13,10 @@ from flask import Flask, redirect, render_template, request, session
 DATABASE = "shift.db"
 # Flaskアプリを作成
 app = Flask(__name__)
+# セッション管理のセキュリティ設定
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # セッション機能に使用する秘密鍵
 app.secret_key = "shift_app_secret"
 csrf = CSRFProtect(app)
@@ -367,6 +371,14 @@ def login():
     # 既にログインしている場合はトップページへ移動
     if "user_id" in session:
         return redirect("/")
+
+    # ログイン失敗回数が5回以上ならログインを止める
+    if session.get("login_failed_count", 0) >= 5:
+        return render_template(
+            "login.html",
+            error="ログイン失敗が多すぎます。しばらくしてから再度お試しください。"
+        )
+
     # ログインフォームが送信された場合
     if request.method == "POST":
         username = request.form["username"]
@@ -374,6 +386,7 @@ def login():
 
         conn = get_db_connection()
         cursor = conn.cursor()
+
         # 入力されたユーザー名に一致するユーザーを検索
         cursor.execute(
             "SELECT id, username, password FROM users WHERE username = ?",
@@ -385,14 +398,17 @@ def login():
         # ハッシュ化されたパスワードを検証
         if user is not None and check_password_hash(user[2], password):
             session["user_id"] = user[0]
+            session.pop("login_failed_count", None)
             return redirect("/")
 
+        # ログイン失敗回数を1増やす
+        session["login_failed_count"] = session.get("login_failed_count", 0) + 1
+
         # ログイン失敗時はログイン画面を再表示
-        # errorをHTMLへ渡して画面に表示する
         return render_template(
-    "login.html",
-    error="ユーザー名またはパスワードが違います"
-)
+            "login.html",
+            error="ユーザー名またはパスワードが違います"
+        )
 
     return render_template("login.html")
 
