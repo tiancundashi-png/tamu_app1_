@@ -1,3 +1,5 @@
+import shutil
+import os
 from flask_wtf.csrf import CSRFProtect
 # 日付や日時計算を行うためのライブラリ
 from datetime import datetime, timedelta
@@ -11,6 +13,7 @@ import sqlite3
 from flask import Flask, redirect, render_template, request, session
 # 使用するデータベースファイル名
 DATABASE = "shift.db"
+BACKUP_DIR = "backups"
 # Flaskアプリを作成
 app = Flask(__name__)
 # セッション管理のセキュリティ設定
@@ -114,12 +117,11 @@ init_db()
 
 
 def is_admin():
-    """
-    ログイン中のユーザーが管理者かどうかを判定する関数
-    """
-     # データベースへ接続
+
+    if "user_id" not in session:
+        return False
+
     conn = get_db_connection()
-     # セッションに保存されているユーザーIDからroleを取得
     cursor = conn.cursor()
 
     cursor.execute(
@@ -128,9 +130,12 @@ def is_admin():
     )
 
     user = cursor.fetchone()
-     # DB接続を終了
+
     conn.close()
-     # roleがadminならTrue、それ以外ならFalseを返す
+
+    if user is None:
+        return False
+
     return user[0] == "admin"
 
 
@@ -513,6 +518,66 @@ def logout():
 
     return redirect("/login")
 
+@app.route("/backup")
+def backup_db():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    # データバックアップを作成するためのディレクトリを作成
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_filename = f"shift_backup_{now}.db"
+    backup_path = os.path.join(BACKUP_DIR, backup_filename)
+
+    shutil.copy(DATABASE, backup_path)
+
+    return f"バックアップを作成しました: {backup_filename}"
+
+@app.route("/backup_list")
+def backup_list():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    files = os.listdir(BACKUP_DIR)
+
+    files.sort(reverse=True)
+
+    return render_template(
+        "backup_list.html",
+        files=files
+    )
+    
+@app.route("/restore_backup/<filename>", methods=["POST"])
+def restore_backup(filename):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    backup_path = os.path.join(BACKUP_DIR, filename)
+
+    if not os.path.exists(backup_path):
+        return redirect("/backup_list")
+
+    before_restore_filename = "before_restore_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".db"
+    before_restore_path = os.path.join(BACKUP_DIR, before_restore_filename)
+
+    shutil.copy(DATABASE, before_restore_path)
+
+    shutil.copy(backup_path, DATABASE)
+
+    return redirect("/backup_list")
+
 @app.route("/confirm_shift/<int:shift_id>")
 def confirm_shift(shift_id):
     if "user_id" not in session:
@@ -730,6 +795,10 @@ def unconfirm_shift(id):
     conn.close()
 
     return redirect("/confirmed_shifts")
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("404.html"), 404
 
 
 if __name__ == "__main__":

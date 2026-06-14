@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>バックアップ一覧</title>
+</head>
+<body>
+
+    <h1>バックアップ一覧</h1>
+
+    <ul>
+        {% for file in files %}
+            <li>
+                {{ file }}
+
+                <form action="/restore_backup/{{ file }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit">復元</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="/">トップへ戻る</a>
+
+</body>
+</html>
