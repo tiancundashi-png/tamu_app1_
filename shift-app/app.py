@@ -578,6 +578,24 @@ def restore_backup(filename):
 
     return redirect("/backup_list")
 
+@app.route("/delete_backup/<filename>", methods=["POST"])
+def delete_backup(filename):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    backup_path = os.path.join(BACKUP_DIR, filename)
+
+    if not os.path.exists(backup_path):
+        return redirect("/backup_list")
+
+    os.remove(backup_path)
+
+    return redirect("/backup_list")
+
 @app.route("/confirm_shift/<int:shift_id>")
 def confirm_shift(shift_id):
     if "user_id" not in session:

@@ -17,6 +17,10 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit">復元</button>
                 </form>
+                <form action="/delete_backup/{{ file }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit">削除</button>
+                </form>
             </li>
         {% endfor %}
     </ul>
