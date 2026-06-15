@@ -327,17 +327,19 @@ def delete(id):
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-     # 既にログインしている場合はトップページへ移動
-    if "user_id" in session:
+    # ログインしていない場合はログイン画面へ移動
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # 管理者でない場合はトップページへ移動
+    if not is_admin():
         return redirect("/")
+
     # ユーザー登録フォームが送信された場合
     if request.method == "POST":
-        # フォームに入力されたユーザー名とパスワードを取得
         username = request.form["username"]
         password = request.form["password"]
 
-        # パスワードをハッシュ化して保存
-        # 平文(そのままの文字列)では保存しない
         hashed_password = generate_password_hash(password)
 
         try:
@@ -347,27 +349,20 @@ def register():
             cursor.execute(
                 "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
                 (username, hashed_password, "user"),
-)
-
-            # 登録したユーザーのIDをセッションへ保存
-            # 自動的にログイン状態になる
-            session["user_id"] = cursor.lastrowid
+            )
 
             conn.commit()
             conn.close()
 
-            return redirect("/")
-        # username の UNIQUE 制約に違反した場合
-        # 同じユーザー名が既に存在する場合
+            return redirect("/admin")
+
         except sqlite3.IntegrityError:
-            # DB接続を閉じる
             conn.close()
-            # エラーメッセージを表示して登録画面を再表示
             return render_template(
                 "register.html",
                 error="そのユーザー名は既に使用されています",
             )
-    # 初回アクセス時は登録画面を表示
+
     return render_template("register.html")
 
 

@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash
 
 DATABASE = "shift.db"
 
-new_password = "ここに新しいパスワード"
+new_password = "ShiftApp!2026_Tamura#47"
 
 conn = sqlite3.connect(DATABASE)
 cursor = conn.cursor()
