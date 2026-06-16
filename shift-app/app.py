@@ -12,7 +12,7 @@ import sqlite3
 # Flask本体と各種機能をインポート
 from flask import Flask, redirect, render_template, request, session
 # 使用するデータベースファイル名
-DATABASE = "shift.db"
+DATABASE = "/home/tamutatsu/tamu_app1_/shift-app/shift.db"
 BACKUP_DIR = "backups"
 # Flaskアプリを作成
 app = Flask(__name__)
