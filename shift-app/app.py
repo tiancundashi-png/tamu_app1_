@@ -1,5 +1,9 @@
 import shutil
 import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DATABASE = os.path.join(BASE_DIR, "shift.db")
+BACKUP_DIR = os.path.join(BASE_DIR, "backups")
 from flask_wtf.csrf import CSRFProtect
 # 日付や日時計算を行うためのライブラリ
 from datetime import datetime, timedelta
@@ -11,9 +15,6 @@ from werkzeug.security import check_password_hash
 import sqlite3
 # Flask本体と各種機能をインポート
 from flask import Flask, redirect, render_template, request, session
-# 使用するデータベースファイル名
-DATABASE = "/home/tamutatsu/tamu_app1_/shift-app/shift.db"
-BACKUP_DIR = "backups"
 # Flaskアプリを作成
 app = Flask(__name__)
 # セッション管理のセキュリティ設定
