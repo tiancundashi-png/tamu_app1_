@@ -1,32 +1,59 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>ログイン</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h1>ログイン</h1>
-{% if error %}
-    <p>{{ error }}</p>
-{% endif %}
+<div class="container">
 
-<form action="/login" method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h1>ログイン</h1>
 
-    <label>ユーザー名</label>
-    <input type="text" name="username">
+    {% if error %}
+        <p id="error-message">
+            {{ error }}
+        </p>
+    {% endif %}
 
-    <br><br>
+    <form action="/login" method="POST">
 
-    <label>パスワード</label>
-    <input type="password" name="password">
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
 
-    <br><br>
+        <div class="form-group">
+            <label>ユーザー名</label>
 
-    <button type="submit">ログイン</button>
+            <input
+                type="text"
+                name="username"
+                required
+            >
+        </div>
 
-</form>
+        <div class="form-group">
+            <label>パスワード</label>
+
+            <input
+                type="password"
+                name="password"
+                required
+            >
+        </div>
+
+        <button type="submit">
+            ログイン
+        </button>
+
+    </form>
+
+</div>
 
 </body>
 </html>

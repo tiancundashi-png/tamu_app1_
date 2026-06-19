@@ -1,14 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>ページが見つかりません</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
+
+<div class="container">
+
     <h1>404 Not Found</h1>
 
-    <p>ページが見つかりませんでした。</p>
+    <div class="shift-card">
 
-    <a href="/">トップページへ戻る</a>
+        <p>
+            お探しのページは存在しないか、
+            URLが間違っている可能性があります。
+        </p>
+
+    </div>
+
+    <br>
+
+    <a
+        href="/"
+        class="menu-link"
+    >
+        トップページへ戻る
+    </a>
+
+</div>
+
 </body>
+
 </html>

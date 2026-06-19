@@ -1,19 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>システムエラー</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
+
+<div class="container">
 
     <h1>システムエラー</h1>
 
-    <p>
-        申し訳ありません。
-        システムエラーが発生しました。
-    </p>
+    <div class="shift-card">
 
-    <a href="/">トップページへ戻る</a>
+        <p id="error-message">
+            申し訳ありません。
+        </p>
+
+        <p>
+            システムエラーが発生しました。
+        </p>
+
+        <p>
+            時間をおいてから再度お試しください。
+        </p>
+
+    </div>
+
+    <br>
+
+    <a
+        href="/"
+        class="menu-link"
+    >
+        トップページへ戻る
+    </a>
+
+</div>
 
 </body>
+
 </html>

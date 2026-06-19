@@ -1,47 +1,65 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>確定シフト一覧</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
+
+<div class="container">
 
     <h1>確定シフト一覧</h1>
 
     {% if shifts|length == 0 %}
+
         <p>確定済みのシフトはありません。</p>
+
     {% else %}
 
-    <table>
-        <thead>
-            <tr>
-                <th>日付</th>
-                <th>ユーザー名</th>
-                <th>勤務時間</th>
-                <th>操作</th>
-            </tr>
-        </thead>
+        <table>
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>ユーザー名</th>
+                    <th>勤務時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
 
-        <tbody>
-            {% for shift in shifts %}
-            <tr>
-                <td>{{ shift.date }}</td>
-                <td>{{ shift.username }}</td>
-                <td>{{ shift.time }} ～ {{ shift.end_time }}</td>
-                <td>
-                    <form action="/unconfirm_shift/{{ shift.id }}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit">取消</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <tbody>
+                {% for shift in shifts %}
+                    <tr>
+                        <td>{{ shift.date }}</td>
+                        <td>{{ shift.username }}</td>
+                        <td>{{ shift.time }} ～ {{ shift.end_time }}</td>
+                        <td>
+                            <form action="/unconfirm_shift/{{ shift.id }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                <button class="delete-button" type="submit">
+                                    取消
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     {% endif %}
-    <p>
-        <a href="/admin">管理者ページに戻る</a>
-    </p>
+
+    <br>
+
+    <a href="/admin" class="menu-link">
+        管理者ページに戻る
+    </a>
+
+</div>
 
 </body>
 </html>

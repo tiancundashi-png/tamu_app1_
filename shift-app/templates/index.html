@@ -3,9 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-
     <title>シフト入力フォーム</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -15,51 +13,47 @@
 
     <h1>シフト入力フォーム</h1>
 
-<p>こんにちは、{{ username }}さん</p>
-
-{% if is_admin_user %}
-    <p>
-        <a href="/admin" class="menu-link">管理者ページ</a>
-    </p>
+    <p>こんにちは、{{ username }}さん</p>
 
     <p>
-        <a href="/confirmed_shifts" class="menu-link">確定シフト一覧</a>
+        {% if is_admin_user %}
+            <a href="/admin" class="menu-link">管理者ページ</a>
+            <a href="/confirmed_shifts" class="menu-link">確定シフト一覧</a>
+        {% endif %}
+
+        <a href="/my_confirmed_shifts" class="menu-link">自分の確定シフトを見る</a>
     </p>
-{% endif %}
 
-<p>
-    <a href="/my_confirmed_shifts" class="menu-link">自分の確定シフトを見る</a>
-</p>
+    <form action="/logout">
+        <button type="submit">ログアウト</button>
+    </form>
 
-<!-- ログアウトボタン -->
-<form action="/logout">
-    <button type="submit">ログアウト</button>
-</form>
+    <hr>
 
-<form method="POST" id="shift-form">
+    <h2>シフト希望を入力</h2>
 
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <form method="POST" id="shift-form">
 
-    
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="form-row">
 
             <div class="form-group">
                 <label>名前</label>
-                <input type="text" name="name" id="name-input">
+                <input type="text" name="name" id="name-input" required>
             </div>
 
             <div class="form-group">
                 <label>日付</label>
-                <input type="date" name="date" id="date-input">
+                <input type="date" name="date" id="date-input" required>
             </div>
 
             <div class="form-group">
-                <label>時間</label>
-                <input type="time" name="time" id="time-input">
+                <label>開始時間</label>
+                <input type="time" name="time" id="time-input" required>
             </div>
 
-            <div class="form-group">    
+            <div class="form-group">
                 <label>終了時間</label>
                 <input type="time" name="end_time" required>
             </div>
@@ -68,34 +62,45 @@
 
         <p id="error-message"></p>
 
-        <button type="submit">送信</button>
+        <button type="submit">シフト希望を送信</button>
 
     </form>
 
-    {% for shift in shifts %}
+    <hr>
 
-    <div class="shift-card">
+    <h2>登録済みのシフト希望</h2>
 
-        <p>名前：{{ shift.name }}</p>
-        <p>日付：{{ shift.date }}</p>
-        <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
+    {% if shifts %}
 
-        <a href="/edit/{{ shift.id }}">
-    編集
-</a>
+        {% for shift in shifts %}
 
-<form action="/delete/{{ shift.id }}" method="POST" class="delete-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="shift-card">
 
-    <button class="delete-button" type="submit">
-        削除
-    </button>
+                <p>名前：{{ shift.name }}</p>
+                <p>日付：{{ shift.date }}</p>
+                <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
 
-</form>
+                <p>
+                    <a href="/edit/{{ shift.id }}" class="menu-link">編集</a>
+                </p>
 
-    </div>
+                <form action="/delete/{{ shift.id }}" method="POST" class="delete-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {% endfor %}
+                    <button class="delete-button" type="submit">
+                        削除
+                    </button>
+                </form>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>登録済みのシフト希望はありません。</p>
+
+    {% endif %}
 
 </div>
 

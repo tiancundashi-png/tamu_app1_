@@ -1,103 +1,9 @@
 body {
-    background-color: #f0f2f5;
-    font-family: sans-serif;
-
-    display: flex;
-    justify-content: center;
-
-    padding-top: 50px;
-}
-.container {
-    background-color: white;
-
-    width: 500px;
-
-    padding: 30px;
-
-    border-radius: 10px;
-
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-button {
-    background-color: #4CAF50;
-    color: white;
-
-    border: none;
-
-    padding: 10px 15px;
-
-    border-radius: 5px;
-
-    cursor: pointer;
-}
-button:hover {
-    background-color: #45a049;
-}
-input {
-    width: 100%;
-
-    padding: 10px;
-
-    margin-top: 5px;
-
-    margin-bottom: 15px;
-
-    box-sizing: border-box;
-}
-.shift-card {
-
-    border: 1px solid #ddd;
-
-    padding: 20px;
-
-    margin-top: 20px;
-
-    border-radius: 10px;
-
-    background-color: #fafafa;
-}
-.delete-button {
-
-    background-color: #e53935;
-}
-.delete-button:hover {
-
-    background-color: #c62828;
-}
-h1 {
-    text-align: center;
-
-    margin-bottom: 30px;
-}
-label {
-
-    font-weight: bold;
-}
-.form-group {
-
-    margin-bottom: 20px;
-}
-button {
-
-    width: 100%;
-}
-.form-group {
-
-    flex: 1;
-}
-#error-message {
-
-    color: red;
-
-    margin-bottom: 15px;
-
-    font-weight: bold;
-}
-body {
     font-family: Arial, sans-serif;
     background-color: #f4f6f8;
     margin: 0;
     padding: 0;
+    color: #333;
 }
 
 .container {
@@ -106,10 +12,18 @@ body {
     background-color: white;
     padding: 30px;
     border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
 }
 
 h1 {
+    text-align: center;
     margin-top: 0;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+h2 {
+    margin-top: 30px;
     color: #333;
 }
 
@@ -122,27 +36,23 @@ a:hover {
     text-decoration: underline;
 }
 
-.form-row {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+label {
+    font-weight: bold;
 }
 
 input {
-    padding: 8px;
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 6px;
 }
 
 button {
-    padding: 8px 14px;
+    width: 100%;
+    padding: 10px 15px;
     border: none;
     border-radius: 6px;
     background-color: #2563eb;
@@ -154,14 +64,6 @@ button:hover {
     background-color: #1d4ed8;
 }
 
-.shift-card {
-    background-color: #f9fafb;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 16px;
-    margin-top: 16px;
-}
-
 .delete-button {
     background-color: #dc2626;
 }
@@ -169,13 +71,7 @@ button:hover {
 .delete-button:hover {
     background-color: #b91c1c;
 }
-.menu-link {
-    display: inline-block;
-    padding: 10px 16px;
-    background: #eef4ff;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
+
 .menu-link {
     display: inline-block;
     padding: 10px 16px;
@@ -190,6 +86,34 @@ button:hover {
 .menu-link:hover {
     background-color: #dbeafe;
     text-decoration: none;
+}
+
+.shift-card {
+    background-color: #f9fafb;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#error-message {
+    color: red;
+    margin-bottom: 15px;
+    font-weight: bold;
 }
 
 table {
@@ -213,4 +137,41 @@ th {
 
 tr:hover {
     background-color: #f9fafb;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 25px 0;
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 15px;
+        padding: 20px;
+        max-width: none;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .menu-link {
+        display: block;
+        margin-right: 0;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
 }

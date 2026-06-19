@@ -1,46 +1,67 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>復元確認</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h1>バックアップ復元確認</h1>
+<div class="container">
 
-<p>
-本当に復元しますか？
-</p>
+    <h1>バックアップ復元確認</h1>
 
-<p>
-復元すると現在のデータは上書きされます。
-</p>
+    <div class="shift-card">
 
-<p>
-対象：
-{{ filename }}
-</p>
+        <p>
+            <strong>本当に復元しますか？</strong>
+        </p>
 
-<form
-    method="POST"
-    action="/restore_backup/{{ filename }}"
->
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="{{ csrf_token() }}"
+        <p id="error-message">
+            復元すると現在のデータは上書きされます。
+        </p>
+
+        <p>
+            対象ファイル：
+        </p>
+
+        <p>
+            {{ filename }}
+        </p>
+
+    </div>
+
+    <form
+        method="POST"
+        action="/restore_backup/{{ filename }}"
     >
 
-    <button type="submit">
-        復元する
-    </button>
-</form>
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
 
-<p>
-    <a href="/backup_list">
+        <button type="submit">
+            復元する
+        </button>
+
+    </form>
+
+    <br>
+
+    <a
+        href="/backup_list"
+        class="menu-link"
+    >
         キャンセル
     </a>
-</p>
+
+</div>
 
 </body>
 </html>

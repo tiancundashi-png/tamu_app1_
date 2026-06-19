@@ -1,29 +1,62 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>シフト確定確認</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
+
+<div class="container">
 
     <h1>シフト確定確認</h1>
 
     <p>以下のシフトを確定しますか？</p>
 
-    <ul>
-        <li>ユーザー名：{{ shift.username }}</li>
-        <li>日付：{{ shift.date }}</li>
-        <li>時間：{{ shift.time }} ～ {{ shift.end_time }}</li>
-    </ul>
+    <div class="shift-card">
+
+        <p>
+            <strong>ユーザー名：</strong>
+            {{ shift.username }}
+        </p>
+
+        <p>
+            <strong>日付：</strong>
+            {{ shift.date }}
+        </p>
+
+        <p>
+            <strong>時間：</strong>
+            {{ shift.time }} ～ {{ shift.end_time }}
+        </p>
+
+    </div>
 
     <form action="/confirm_shift/{{ shift.id }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit">確定する</button>
+
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
+
+        <button type="submit">
+            シフトを確定する
+        </button>
+
     </form>
 
-    <p>
-        <a href="/admin">管理者ページに戻る</a>
-    </p>
+    <br>
+
+    <a href="/admin" class="menu-link">
+        管理者ページに戻る
+    </a>
+
+</div>
 
 </body>
 </html>

@@ -3,65 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <title>管理者ページ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <h1>管理者ページ</h1>
+    <div class="container">
 
-    <h2>管理者メニュー</h2>
+        <h1>管理者ページ</h1>
 
-    <ul>
-        <li><a href="/register">スタッフ登録</a></li>
-        <li><a href="/users">従業員一覧</a></li>
-        <li><a href="/confirmed_shifts">確定済みシフト一覧</a></li>
-        <li><a href="/backup">バックアップ作成</a></li>
-        <li><a href="/backup_list">バックアップ一覧</a></li>
-        <li><a href="/">トップページに戻る</a></li>
-    </ul>
+        <h2>管理者メニュー</h2>
 
-    <hr>
+        <p>
+            <a class="menu-link" href="/register">スタッフ登録</a>
+            <a class="menu-link" href="/users">従業員一覧</a>
+            <a class="menu-link" href="/confirmed_shifts">確定済みシフト一覧</a>
+            <a class="menu-link" href="/backup">バックアップ作成</a>
+            <a class="menu-link" href="/backup_list">バックアップ一覧</a>
+            <a class="menu-link" href="/">トップページに戻る</a>
+        </p>
 
-    <h2>全従業員のシフト希望</h2>
+        <hr>
 
-    <form method="GET" action="/admin">
-        <label>日付で絞り込み</label>
+        <h2>全従業員のシフト希望</h2>
 
-        <input
-            type="date"
-            name="date"
-            value="{{ selected_date }}"
-        >
+        <form method="GET" action="/admin">
+            <label>日付で絞り込み</label>
 
-        <button type="submit">検索</button>
-    </form>
+            <input
+                type="date"
+                name="date"
+                value="{{ selected_date }}"
+            >
 
-    <hr>
+            <button type="submit">検索</button>
+        </form>
 
-    {% if shifts %}
+        <hr>
 
-        {% for shift in shifts %}
+        {% if shifts %}
 
-            <div>
-                <p>ユーザー名：{{ shift.username }}</p>
-                <p>日付：{{ shift.date }}</p>
-                <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
+            {% for shift in shifts %}
 
-                <p>
-                    <a href="/confirm_shift/{{ shift.id }}">
-                        このシフトを確定する
-                    </a>
-                </p>
-            </div>
+                <div class="shift-card">
+                    <p>ユーザー名：{{ shift.username }}</p>
+                    <p>日付：{{ shift.date }}</p>
+                    <p>時間：{{ shift.time }} ～ {{ shift.end_time }}</p>
 
-            <hr>
+                    <p>
+                        <a class="menu-link" href="/confirm_shift/{{ shift.id }}">
+                            このシフトを確定する
+                        </a>
+                    </p>
+                </div>
 
-        {% endfor %}
+            {% endfor %}
 
-    {% else %}
+        {% else %}
 
-        <p>表示できるシフト希望はありません。</p>
+            <p>表示できるシフト希望はありません。</p>
 
-    {% endif %}
+        {% endif %}
+
+    </div>
 
 </body>
 </html>

@@ -1,33 +1,71 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>従業員一覧</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h1>従業員一覧</h1>
+<div class="container">
 
-<ul>
-    {% for user in users %}
-        <li>
-            ID: {{ user.id }} /
-            ユーザー名: {{ user.username }} /
-            権限: {{ user.role }}
+    <h1>従業員一覧</h1>
 
-            {% if user.role != "admin" %}
-                <form action="/delete_user/{{ user.id }}" method="POST" style="display:inline;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <a href="/delete_user_confirm/{{ user.id }}">削除</a>
-                </form>
-            {% endif %}
-        </li>
-    {% endfor %}
-</ul>
+    <table>
 
-<p>
-    <a href="/admin">管理者ページへ戻る</a>
-</p>
+        <tr>
+            <th>ID</th>
+            <th>ユーザー名</th>
+            <th>権限</th>
+            <th>操作</th>
+        </tr>
+
+        {% for user in users %}
+
+        <tr>
+
+            <td>{{ user.id }}</td>
+
+            <td>{{ user.username }}</td>
+
+            <td>{{ user.role }}</td>
+
+            <td>
+
+                {% if user.role != "admin" %}
+
+                    <a
+                        class="menu-link"
+                        href="/delete_user_confirm/{{ user.id }}"
+                    >
+                        削除
+                    </a>
+
+                {% else %}
+
+                    ―
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    <br>
+
+    <a class="menu-link" href="/admin">
+        管理者ページへ戻る
+    </a>
+
+</div>
 
 </body>
 </html>
