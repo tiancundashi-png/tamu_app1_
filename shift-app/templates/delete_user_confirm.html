@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>従業員削除確認</title>
+</head>
+<body>
+
+<h1>従業員削除確認</h1>
+
+<p>本当にこの従業員を削除しますか？</p>
+
+<p>ユーザー名：{{ user.username }}</p>
+<p>権限：{{ user.role }}</p>
+
+<p>
+この従業員の未確定シフト・確定済みシフトも削除されます。
+</p>
+
+<form action="/delete_user/{{ user.id }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">削除する</button>
+</form>
+
+<p>
+    <a href="/users">キャンセル</a>
+</p>
+
+</body>
+</html>

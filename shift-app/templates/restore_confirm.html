@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>復元確認</title>
+</head>
+<body>
+
+<h1>バックアップ復元確認</h1>
+
+<p>
+本当に復元しますか？
+</p>
+
+<p>
+復元すると現在のデータは上書きされます。
+</p>
+
+<p>
+対象：
+{{ filename }}
+</p>
+
+<form
+    method="POST"
+    action="/restore_backup/{{ filename }}"
+>
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+    <button type="submit">
+        復元する
+    </button>
+</form>
+
+<p>
+    <a href="/backup_list">
+        キャンセル
+    </a>
+</p>
+
+</body>
+</html>

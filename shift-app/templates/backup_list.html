@@ -13,14 +13,8 @@
             <li>
                 {{ file }}
 
-                <form action="/restore_backup/{{ file }}" method="POST" style="display:inline;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit">復元</button>
-                </form>
-                <form action="/delete_backup/{{ file }}" method="POST" style="display:inline;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit">削除</button>
-                </form>
+                
+                <a href="/restore_confirm/{{ file }}">復元</a>
             </li>
         {% endfor %}
     </ul>

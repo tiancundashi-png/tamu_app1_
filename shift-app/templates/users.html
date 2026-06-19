@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>従業員一覧</title>
+</head>
+<body>
+
+<h1>従業員一覧</h1>
+
+<ul>
+    {% for user in users %}
+        <li>
+            ID: {{ user.id }} /
+            ユーザー名: {{ user.username }} /
+            権限: {{ user.role }}
+
+            {% if user.role != "admin" %}
+                <form action="/delete_user/{{ user.id }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <a href="/delete_user_confirm/{{ user.id }}">削除</a>
+                </form>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+<p>
+    <a href="/admin">管理者ページへ戻る</a>
+</p>
+
+</body>
+</html>
