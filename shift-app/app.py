@@ -770,17 +770,17 @@ def confirm_shift_post(shift_id):
     if not is_admin():
         return redirect("/")
 
+    date = request.form["date"]
+    time = request.form["time"]
+    end_time = request.form["end_time"]
+
     conn = get_db_connection()
     cursor = conn.cursor()
-    # 確定対象のシフト情報を取得
-    # usersテーブルと結合してユーザー名も取得する
+
     cursor.execute(
         """
         SELECT shifts.user_id,
-               users.username,
-               shifts.date,
-               shifts.time,
-               shifts.end_time
+               users.username
         FROM shifts
         JOIN users
         ON shifts.user_id = users.id
@@ -794,9 +794,9 @@ def confirm_shift_post(shift_id):
     if shift is None:
         conn.close()
         return redirect("/admin")
-    # 同じシフトが既に確定済みか確認
+
     cursor.execute(
-    """
+        """
         SELECT COUNT(*)
         FROM confirmed_shifts
         WHERE user_id = ?
@@ -806,18 +806,18 @@ def confirm_shift_post(shift_id):
         """,
         (
             shift[0],
-            shift[2],
-            shift[3],
-            shift[4]
+            date,
+            time,
+            end_time
         )
     )
 
     result = cursor.fetchone()
-    # 既に確定済みの場合は一覧画面へ移動
+
     if result[0] > 0:
         conn.close()
         return redirect("/confirmed_shifts")
-    # confirmed_shiftsテーブルへ確定シフトを登録
+
     cursor.execute(
         """
         INSERT INTO confirmed_shifts (
@@ -825,16 +825,16 @@ def confirm_shift_post(shift_id):
             username,
             date,
             time,
-        end_time
-    )
-    VALUES (?, ?, ?, ?, ?)
+            end_time
+        )
+        VALUES (?, ?, ?, ?, ?)
         """,
         (
             shift[0],
             shift[1],
-            shift[2],
-            shift[3],
-            shift[4]
+            date,
+            time,
+            end_time
         ),
     )
 
@@ -842,7 +842,6 @@ def confirm_shift_post(shift_id):
     conn.close()
 
     return redirect("/admin")
-
 @app.route("/confirmed_shifts")
 def confirmed_shifts():
     if "user_id" not in session:
