@@ -1,3 +1,4 @@
+import secrets
 import shutil
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +23,7 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # セッション機能に使用する秘密鍵
-app.secret_key = "shift_app_secret"
+app.secret_key = secrets.token_hex(32)
 csrf = CSRFProtect(app)
 
 
@@ -506,6 +507,120 @@ def admin():
         shifts=shifts,
         selected_date=selected_date,
     )
+    
+@app.route("/users")
+def users():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, username, role
+        FROM users
+        ORDER BY id
+        """
+    )
+
+    users = [
+        {
+            "id": row[0],
+            "username": row[1],
+            "role": row[2],
+        }
+        for row in cursor.fetchall()
+    ]
+
+    conn.close()
+
+    return render_template("users.html", users=users)
+
+@app.route("/delete_user_confirm/<int:user_id>")
+def delete_user_confirm(user_id):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT id, username, role FROM users WHERE id = ?",
+        (user_id,)
+    )
+
+    user = cursor.fetchone()
+    conn.close()
+
+    if user is None:
+        return redirect("/users")
+
+    if user[2] == "admin":
+        return redirect("/users")
+
+    user_data = {
+        "id": user[0],
+        "username": user[1],
+        "role": user[2],
+    }
+
+    return render_template("delete_user_confirm.html", user=user_data)
+
+@app.route("/delete_user/<int:user_id>", methods=["POST"])
+def delete_user(user_id):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT role FROM users WHERE id = ?",
+        (user_id,)
+    )
+
+    user = cursor.fetchone()
+
+    if user is None:
+        conn.close()
+        return redirect("/users")
+
+    if user[0] == "admin":
+        conn.close()
+        return redirect("/users")
+
+    cursor.execute(
+        "DELETE FROM shifts WHERE user_id = ?",
+        (user_id,)
+    )
+
+    cursor.execute(
+        "DELETE FROM confirmed_shifts WHERE user_id = ?",
+        (user_id,)
+    )
+
+    cursor.execute(
+        "DELETE FROM users WHERE id = ?",
+        (user_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/users")
 @app.route("/logout")
 def logout():
 
@@ -549,6 +664,20 @@ def backup_list():
     return render_template(
         "backup_list.html",
         files=files
+    )
+    
+@app.route("/restore_confirm/<filename>")
+def restore_confirm(filename):
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not is_admin():
+        return redirect("/")
+
+    return render_template(
+        "restore_confirm.html",
+        filename=filename
     )
     
 @app.route("/restore_backup/<filename>", methods=["POST"])
