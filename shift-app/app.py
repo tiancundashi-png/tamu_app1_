@@ -23,9 +23,8 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # セッション機能に使用する秘密鍵
-app.secret_key = secrets.token_hex(32)
+app.secret_key = "shift_app_2026_secure_secret_key_tamutatsu_7f3a9c2b8e1d"
 csrf = CSRFProtect(app)
-
 
 def init_db():
     """
