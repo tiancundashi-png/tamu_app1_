@@ -85,7 +85,7 @@ def init_db():
     admin_user = cursor.fetchone()
      # adminユーザーが存在しない場合のみ作成
     if admin_user is None:
-        # パスワードをハッシュ化
+         # 初回起動用の仮パスワード
         admin_password = generate_password_hash("admin123")
         # 管理者アカウントを登録
         cursor.execute(
