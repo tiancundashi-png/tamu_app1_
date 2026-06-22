@@ -837,6 +837,14 @@ def confirm_shift_post(shift_id):
             end_time
         ),
     )
+    
+    cursor.execute(
+        """
+        DELETE FROM shifts
+        WHERE id = ?
+        """,
+        (shift_id,)
+    )
 
     conn.commit()
     conn.close()
