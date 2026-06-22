@@ -175,3 +175,64 @@ hr {
         padding: 8px;
     }
 }
+
+@media (max-width: 600px) {
+    body {
+        padding: 0;
+        background-color: #f4f6f8;
+    }
+
+    .container {
+        margin: 12px;
+        padding: 20px;
+        max-width: none;
+        border-radius: 10px;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    input {
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    button {
+        font-size: 16px;
+        padding: 12px;
+        width: 100%;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .menu-link {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        margin-right: 0;
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+
+    .shift-card {
+        padding: 16px;
+        margin-top: 14px;
+    }
+
+    table {
+        font-size: 14px;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
