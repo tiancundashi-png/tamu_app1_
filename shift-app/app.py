@@ -106,32 +106,27 @@ def get_db_connection():
 init_db()
 
 
-
-
-
 def is_admin():
+    """
+    ログイン中のユーザーが管理者かどうかを判定する
+    """
+    user_id = session.get("user_id")
 
-    if "user_id" not in session:
+    if user_id is None:
         return False
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT role FROM users WHERE id = ?",
-        (session["user_id"],),
-    )
-
-    user = cursor.fetchone()
-
-    conn.close()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT role FROM users WHERE id = ?",
+            (user_id,),
+        )
+        user = cursor.fetchone()
 
     if user is None:
         return False
 
     return user[0] == "admin"
-
-
 @app.route("/", methods=["GET", "POST"])
 def home():
     """
