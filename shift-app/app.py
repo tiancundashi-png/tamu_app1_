@@ -134,86 +134,77 @@ def home():
     GET：ログイン中ユーザーのシフト一覧を表示
     POST：入力されたシフトを登録
     """
-    # ログインしていない場合はログイン画面へ移動
-    if "user_id" not in session:
+    user_id = session.get("user_id")
+
+    if user_id is None:
         return redirect("/login")
 
-    # ログイン中のユーザー情報を取得
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT username, role FROM users WHERE id = ?",
-        (session["user_id"],),
-    )
-    user = cursor.fetchone()
-    # DB接続を終了
-    conn.close()
-     # フォームからシフトが送信された場合
-    if request.method == "POST":
-        # フォームに入力された値を取得
-        name = request.form["name"]
-        date = request.form["date"]
-        time = request.form["time"]
-        end_time = request.form["end_time"]
-         # ログイン中のユーザーIDを取得
-        user_id = session["user_id"]
-         # データベースへ接続
-        conn = get_db_connection()
+    with get_db_connection() as conn:
         cursor = conn.cursor()
-         # 入力されたシフト情報を登録
+        cursor.execute(
+            "SELECT username, role FROM users WHERE id = ?",
+            (user_id,),
+        )
+        user = cursor.fetchone()
+
+    if user is None:
+        session.clear()
+        return redirect("/login")
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        date = request.form.get("date")
+        time = request.form.get("time")
+        end_time = request.form.get("end_time")
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO shifts (
+                    user_id,
+                    name,
+                    date,
+                    time,
+                    end_time
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (user_id, name, date, time, end_time),
+            )
+            conn.commit()
+
+        return redirect("/")
+
+    today = datetime.today().date()
+    two_weeks_later = today + timedelta(days=14)
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
         cursor.execute(
             """
-            INSERT INTO shifts (
-                user_id,
-                name,
-                date,
-                time,
-                end_time
+            SELECT id, name, date, time, end_time
+            FROM shifts
+            WHERE user_id = ?
+              AND date >= ?
+              AND date <= ?
+            ORDER BY date
+            """,
+            (user_id, str(today), str(two_weeks_later)),
         )
-    VALUES (?, ?, ?, ?, ?)
-    """,
-    (user_id, name, date, time, end_time),
-)
-         # 変更内容を保存
-        conn.commit()
-         # DB接続を終了
-        conn.close()
-        # 登録後はトップページへ戻る
-        return redirect("/")
-     # 今日の日付を取得
-    today = datetime.today().date()
-    # 今日から2週間後の日付を計算
-    two_weeks_later = today + timedelta(days=14)
-     # データベースへ接続
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # ログイン中のユーザー本人のシフトだけ取得
-     # 今日から2週間後までのシフトを日付順で表示する
-    cursor.execute(
-        """
-        SELECT id, name, date, time, end_time
-        FROM shifts
-        WHERE user_id = ?
-          AND date >= ?
-          AND date <= ?
-        ORDER BY date
-        """,
-        (session["user_id"], str(today), str(two_weeks_later)),
-    )
-     # 取得したシフト情報をHTMLで使いやすい辞書形式に変換
+        rows = cursor.fetchall()
+
     shifts = [
         {
             "id": row[0],
             "name": row[1],
             "date": row[2],
             "time": row[3],
-        "end_time": row[4]
+            "end_time": row[4],
         }
-        for row in cursor.fetchall()
+        for row in rows
     ]
-     # DB接続を終了
-    conn.close()
-    # index.htmlに必要なデータを渡して表示
+
     return render_template(
         "index.html",
         shifts=shifts,
@@ -221,43 +212,41 @@ def home():
         is_admin_user=(user[1] == "admin"),
     )
 
-
 @app.route("/edit/<int:id>")
 def edit(id):
-    # ログインしていない場合はログイン画面へ移動
-    if "user_id" not in session:
+    """
+    シフト編集画面を表示する
+    """
+    user_id = session.get("user_id")
+
+    if user_id is None:
         return redirect("/login")
-    # データベースへ接続
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # ログイン中のユーザーのシフトだけ取得
-    # user_idも条件にすることで他人のシフトを編集できないようにする
-    cursor.execute(
-        """
-        SELECT id, name, date, time, end_time
-        FROM shifts
-        WHERE id = ?
-          AND user_id = ?
-        """,
-        (id, session["user_id"]),
-    )
-    row = cursor.fetchone()
-    conn.close()
-    # シフトが存在しない場合はトップページへ戻る
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, name, date, time, end_time
+            FROM shifts
+            WHERE id = ?
+              AND user_id = ?
+            """,
+            (id, user_id),
+        )
+        row = cursor.fetchone()
+
     if row is None:
         return redirect("/")
-    # HTMLで扱いやすい辞書形式へ変換
+
     shift = {
         "id": row[0],
         "name": row[1],
         "date": row[2],
         "time": row[3],
-        "end_time": row[4]
+        "end_time": row[4],
     }
-    # 編集画面を表示
+
     return render_template("edit.html", shift=shift)
-
-
 @app.route("/update/<int:id>", methods=["POST"])
 def update(id):
     # ログインしていない場合はログイン画面へ移動
