@@ -249,59 +249,56 @@ def edit(id):
     return render_template("edit.html", shift=shift)
 @app.route("/update/<int:id>", methods=["POST"])
 def update(id):
-    # ログインしていない場合はログイン画面へ移動
-    if "user_id" not in session:
+    """
+    シフト情報を更新する
+    """
+    user_id = session.get("user_id")
+
+    if user_id is None:
         return redirect("/login")
-    # フォームから送信された値を取得
-    name = request.form["name"]
-    date = request.form["date"]
-    time = request.form["time"]
-    end_time = request.form["end_time"]
-    # データベースへ接続
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # ログイン中のユーザー本人のシフトだけ更新可能
-    # user_idも条件にすることで本人以外は更新できない
-    cursor.execute(
-        """
-        UPDATE shifts
-        SET name = ?, date = ?, time = ?, end_time = ?
-        WHERE id = ?
-          AND user_id = ?
-        """,
-        (name, date, time, end_time, id, session["user_id"]),
-    )
-    # 更新内容を保存
-    conn.commit()
-    # DB接続を終了
-    conn.close()
-    # 更新後はトップページへ戻る
+
+    name = request.form.get("name")
+    date = request.form.get("date")
+    time = request.form.get("time")
+    end_time = request.form.get("end_time")
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE shifts
+            SET name = ?, date = ?, time = ?, end_time = ?
+            WHERE id = ?
+              AND user_id = ?
+            """,
+            (name, date, time, end_time, id, user_id),
+        )
+        conn.commit()
+
     return redirect("/")
-
-
 @app.route("/delete/<int:id>", methods=["POST"])
 def delete(id):
-    # ログインしていない場合はログイン画面へ移動
-    if "user_id" not in session:
+    """
+    シフト情報を削除する
+    """
+    user_id = session.get("user_id")
+
+    if user_id is None:
         return redirect("/login")
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # ログイン中のユーザー本人のシフトだけ削除可能
-    cursor.execute(
-        """
-        DELETE FROM shifts
-        WHERE id = ?
-          AND user_id = ?
-        """,
-        (id, session["user_id"]),
-    )
-    conn.commit()
-    conn.close()
-    # 削除後はトップページへ戻る
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            DELETE FROM shifts
+            WHERE id = ?
+              AND user_id = ?
+            """,
+            (id, user_id),
+        )
+        conn.commit()
+
     return redirect("/")
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # ログインしていない場合はログイン画面へ移動
