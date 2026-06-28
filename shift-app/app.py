@@ -1,108 +1,100 @@
+import os
 import secrets
 import shutil
-import os
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+import sqlite3
+from datetime import datetime, timedelta
 
+from flask import Flask, redirect, render_template, request, session
+from flask_wtf.csrf import CSRFProtect
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "shift.db")
 BACKUP_DIR = os.path.join(BASE_DIR, "backups")
-from flask_wtf.csrf import CSRFProtect
-# 日付や日時計算を行うためのライブラリ
-from datetime import datetime, timedelta
-# パスワードを安全に保存するためのハッシュ化機能
-from werkzeug.security import generate_password_hash
-# 入力されたパスワードとハッシュ化済みパスワードを照合する機能
-from werkzeug.security import check_password_hash
-# SQLiteデータベースを操作するためのライブラリ
-import sqlite3
-# Flask本体と各種機能をインポート
-from flask import Flask, redirect, render_template, request, session
-# Flaskアプリを作成
+
 app = Flask(__name__)
-# セッション管理のセキュリティ設定
+
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") == "production"
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-# セッション機能に使用する秘密鍵
-app.secret_key = "shift_app_2026_secure_secret_key_tamutatsu_7f3a9c2b8e1d"
+
 csrf = CSRFProtect(app)
 
 def init_db():
     """
-    アプリ起動時に必要なテーブルを作成する関数
-    初回起動時は管理者アカウントも自動作成する
+    アプリ起動時に必要なテーブルを作成する関数。
+    初回起動時は管理者アカウントも自動作成する。
     """
-    # データベースへ接続
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    # シフト情報を保存するテーブル
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS shifts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            name TEXT,
-            date TEXT,
-            time TEXT,
-            end_time TEXT
-        )
-        """
-    )
-     # ユーザー情報を保存するテーブル
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT,
-            role TEXT
-        )
-        """
-    )
-     # 確定済みシフトを保存するテーブル
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS confirmed_shifts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            username TEXT,
-            date TEXT,
-            time TEXT,
-            end_time TEXT
-        )
-        """
-    )
-     # 初回起動時に管理者ユーザーを作成
-    cursor.execute(
-        """
-        SELECT id
-        FROM users
-        WHERE username = ?
-        """,
-        ("admin",)
-    )
-    # adminユーザーが存在するか確認
-    admin_user = cursor.fetchone()
-     # adminユーザーが存在しない場合のみ作成
-    if admin_user is None:
-         # 初回起動用の仮パスワード
-        admin_password = generate_password_hash("admin123")
-        # 管理者アカウントを登録
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+
         cursor.execute(
             """
-            INSERT INTO users (
-                username,
-                password,
-                role
+            CREATE TABLE IF NOT EXISTS shifts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                name TEXT,
+                date TEXT,
+                time TEXT,
+                end_time TEXT
             )
-            VALUES (?, ?, ?)
-            """,
-            ("admin", admin_password, "admin")
+            """
         )
-     # 変更内容を保存
-    conn.commit()
-     # DB接続を終了    
-    conn.close()
 
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE,
+                password TEXT,
+                role TEXT
+            )
+            """
+        )
+
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS confirmed_shifts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                username TEXT,
+                date TEXT,
+                time TEXT,
+                end_time TEXT
+            )
+            """
+        )
+
+        cursor.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE username = ?
+            """,
+            ("admin",)
+        )
+
+        admin_user = cursor.fetchone()
+
+        if admin_user is None:
+            admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+            hashed_password = generate_password_hash(admin_password)
+
+            cursor.execute(
+                """
+                INSERT INTO users (
+                    username,
+                    password,
+                    role
+                )
+                VALUES (?, ?, ?)
+                """,
+                ("admin", hashed_password, "admin")
+            )
+
+        conn.commit()
 
 def get_db_connection():
     """
