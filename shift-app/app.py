@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 import secrets
 import shutil
@@ -105,6 +106,19 @@ def get_db_connection():
 
 init_db()
 
+from functools import wraps
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user_id = session.get("user_id")
+
+        if user_id is None:
+            return redirect("/login")
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 def is_admin():
     """
@@ -128,6 +142,7 @@ def is_admin():
 
     return user[0] == "admin"
 @app.route("/", methods=["GET", "POST"])
+@login_required
 def home():
     """
     トップページの処理
@@ -136,8 +151,7 @@ def home():
     """
     user_id = session.get("user_id")
 
-    if user_id is None:
-        return redirect("/login")
+
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -213,14 +227,13 @@ def home():
     )
 
 @app.route("/edit/<int:id>")
+@login_required
 def edit(id):
+    user_id = session.get("user_id")
     """
     シフト編集画面を表示する
     """
-    user_id = session.get("user_id")
-
-    if user_id is None:
-        return redirect("/login")
+    
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -248,14 +261,14 @@ def edit(id):
 
     return render_template("edit.html", shift=shift)
 @app.route("/update/<int:id>", methods=["POST"])
+@login_required
 def update(id):
     """
     シフト情報を更新する
     """
     user_id = session.get("user_id")
 
-    if user_id is None:
-        return redirect("/login")
+
 
     name = request.form.get("name")
     date = request.form.get("date")
@@ -277,14 +290,12 @@ def update(id):
 
     return redirect("/")
 @app.route("/delete/<int:id>", methods=["POST"])
+@login_required
 def delete(id):
     """
     シフト情報を削除する
     """
     user_id = session.get("user_id")
-
-    if user_id is None:
-        return redirect("/login")
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
