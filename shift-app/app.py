@@ -120,6 +120,21 @@ def login_required(func):
 
     return wrapper
 
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user_id = session.get("user_id")
+
+        if user_id is None:
+            return redirect("/login")
+
+        if not is_admin():
+            return redirect("/")
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
 def is_admin():
     """
     ログイン中のユーザーが管理者かどうかを判定する
@@ -409,69 +424,68 @@ def manager():
     return "管理者ページ"
 
 @app.route("/admin")
+@admin_required
 def admin():
-
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-    # 日付検索で指定された日付を取得
+    """
+    管理者画面を表示する
+    未確定のシフト希望を一覧表示する
+    """
     selected_date = request.args.get("date")
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # 全ユーザーのシフトを取得
-    if selected_date:
-        cursor.execute(
-            """
-            SELECT
-                shifts.id,
-                users.username,
-                shifts.date,
-                shifts.time,
-                shifts.end_time
-            FROM shifts
-            JOIN users
-            ON shifts.user_id = users.id
-            WHERE shifts.date = ?
-              AND NOT EXISTS (
-                  SELECT 1
-                  FROM confirmed_shifts
-                WHERE confirmed_shifts.user_id = shifts.user_id
-                    AND confirmed_shifts.date = shifts.date
-                    AND confirmed_shifts.time = shifts.time
-                    AND confirmed_shifts.end_time = shifts.end_time
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        if selected_date:
+            cursor.execute(
+                """
+                SELECT
+                    shifts.id,
+                    users.username,
+                    shifts.date,
+                    shifts.time,
+                    shifts.end_time
+                FROM shifts
+                JOIN users
+                ON shifts.user_id = users.id
+                WHERE shifts.date = ?
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM confirmed_shifts
+                      WHERE confirmed_shifts.user_id = shifts.user_id
+                        AND confirmed_shifts.date = shifts.date
+                        AND confirmed_shifts.time = shifts.time
+                        AND confirmed_shifts.end_time = shifts.end_time
+                  )
+                ORDER BY shifts.date
+                """,
+                (selected_date,),
             )
-            ORDER BY shifts.date
-            """,
-            (selected_date,)
-        )
-    else:
-        # 日付指定がない場合は全ての未確定シフトを取得
-        cursor.execute(
-            """
-            SELECT
-                shifts.id,
-                users.username,
-                shifts.date,
-                shifts.time,
-                shifts.end_time
-            FROM shifts
-            JOIN users
-            ON shifts.user_id = users.id
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM confirmed_shifts
-                WHERE confirmed_shifts.user_id = shifts.user_id
-                  AND confirmed_shifts.date = shifts.date
-                  AND confirmed_shifts.time = shifts.time
-                  AND confirmed_shifts.end_time = shifts.end_time
+        else:
+            cursor.execute(
+                """
+                SELECT
+                    shifts.id,
+                    users.username,
+                    shifts.date,
+                    shifts.time,
+                    shifts.end_time
+                FROM shifts
+                JOIN users
+                ON shifts.user_id = users.id
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM confirmed_shifts
+                    WHERE confirmed_shifts.user_id = shifts.user_id
+                      AND confirmed_shifts.date = shifts.date
+                      AND confirmed_shifts.time = shifts.time
+                      AND confirmed_shifts.end_time = shifts.end_time
+                )
+                ORDER BY shifts.date
+                """
             )
-            ORDER BY shifts.date
-            """
-        )
-        # HTMLで扱いやすい辞書形式へ変換
+
+        rows = cursor.fetchall()
+
     shifts = [
         {
             "id": row[0],
@@ -480,17 +494,14 @@ def admin():
             "time": row[3],
             "end_time": row[4],
         }
-        for row in cursor.fetchall()
+        for row in rows
     ]
 
-    conn.close()
-    # 管理者画面を表示
     return render_template(
         "admin.html",
         shifts=shifts,
         selected_date=selected_date,
     )
-    
 @app.route("/users")
 def users():
 
