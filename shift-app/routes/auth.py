@@ -1,5 +1,7 @@
+import sqlite3
+
 from flask import Blueprint, redirect, render_template, request, session
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from database import get_db_connection
 
@@ -61,3 +63,39 @@ def logout():
     session.clear()
 
     return redirect("/login")
+
+@auth_bp.route("/register", methods=["GET", "POST"])
+def register():
+    """
+    管理者が新規ユーザーを登録する
+    """
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        hashed_password = generate_password_hash(password)
+
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                    (username, hashed_password, "user"),
+                )
+                conn.commit()
+
+            return redirect("/admin")
+
+        except sqlite3.IntegrityError:
+            return render_template(
+                "register.html",
+                error="そのユーザー名は既に使用されています",
+            )
+
+    return render_template("register.html")

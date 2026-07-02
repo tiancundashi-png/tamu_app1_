@@ -299,45 +299,6 @@ def delete(id):
         conn.commit()
 
     return redirect("/")
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    # ログインしていない場合はログイン画面へ移動
-    if "user_id" not in session:
-        return redirect("/login")
-
-    # 管理者でない場合はトップページへ移動
-    if not is_admin():
-        return redirect("/")
-
-    # ユーザー登録フォームが送信された場合
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        hashed_password = generate_password_hash(password)
-
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-
-            cursor.execute(
-                "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
-                (username, hashed_password, "user"),
-            )
-
-            conn.commit()
-            conn.close()
-
-            return redirect("/admin")
-
-        except sqlite3.IntegrityError:
-            conn.close()
-            return render_template(
-                "register.html",
-                error="そのユーザー名は既に使用されています",
-            )
-
-    return render_template("register.html")
 
 
 
