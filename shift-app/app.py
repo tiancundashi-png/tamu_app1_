@@ -139,23 +139,7 @@ def is_admin():
     """
     ログイン中のユーザーが管理者かどうかを判定する
     """
-    user_id = session.get("user_id")
-
-    if user_id is None:
-        return False
-
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT role FROM users WHERE id = ?",
-            (user_id,),
-        )
-        user = cursor.fetchone()
-
-    if user is None:
-        return False
-
-    return user[0] == "admin"
+    return session.get("role") == "admin"
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def home():
@@ -165,20 +149,6 @@ def home():
     POST：入力されたシフトを登録
     """
     user_id = session.get("user_id")
-
-
-
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT username, role FROM users WHERE id = ?",
-            (user_id,),
-        )
-        user = cursor.fetchone()
-
-    if user is None:
-        session.clear()
-        return redirect("/login")
 
     if request.method == "POST":
         name = request.form.get("name")
@@ -237,8 +207,8 @@ def home():
     return render_template(
         "index.html",
         shifts=shifts,
-        username=user[0],
-        is_admin_user=(user[1] == "admin"),
+        username=session.get("username"),
+        is_admin_user=session.get("role") == "admin",
     )
 
 @app.route("/edit/<int:id>")
@@ -368,43 +338,40 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # 既にログインしている場合はトップページへ移動
     if "user_id" in session:
         return redirect("/")
 
-    # ログイン失敗回数が5回以上ならログインを止める
     if session.get("login_failed_count", 0) >= 5:
         return render_template(
             "login.html",
             error="ログイン失敗が多すぎます。しばらくしてから再度お試しください。"
         )
 
-    # ログインフォームが送信された場合
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, username, password, role
+                FROM users
+                WHERE username = ?
+                """,
+                (username,),
+            )
+            user = cursor.fetchone()
 
-        # 入力されたユーザー名に一致するユーザーを検索
-        cursor.execute(
-            "SELECT id, username, password FROM users WHERE username = ?",
-            (username,),
-        )
-        user = cursor.fetchone()
-        conn.close()
-
-        # ハッシュ化されたパスワードを検証
         if user is not None and check_password_hash(user[2], password):
             session["user_id"] = user[0]
+            session["username"] = user[1]
+            session["role"] = user[3]
             session.pop("login_failed_count", None)
             return redirect("/")
 
-        # ログイン失敗回数を1増やす
         session["login_failed_count"] = session.get("login_failed_count", 0) + 1
 
-        # ログイン失敗時はログイン画面を再表示
         return render_template(
             "login.html",
             error="ユーザー名またはパスワードが違います"
@@ -716,33 +683,27 @@ def delete_backup(filename):
     return redirect("/backup_list")
 
 @app.route("/confirm_shift/<int:shift_id>")
+@admin_required
 def confirm_shift(shift_id):
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # 指定されたシフトIDの情報を取得
-    # usersテーブルと結合してユーザー名も取得する
-    cursor.execute(
-        """
-        SELECT shifts.id,
-               users.username,
-               shifts.date,
-               shifts.time,
-               shifts.end_time
-        FROM shifts
-        JOIN users ON shifts.user_id = users.id
-        WHERE shifts.id = ?
-        """,
-        (shift_id,)
-    )
-
-    row = cursor.fetchone()
-    conn.close()
+    """
+    管理者がシフト確定画面を表示する
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT shifts.id,
+                   users.username,
+                   shifts.date,
+                   shifts.time,
+                   shifts.end_time
+            FROM shifts
+            JOIN users ON shifts.user_id = users.id
+            WHERE shifts.id = ?
+            """,
+            (shift_id,),
+        )
+        row = cursor.fetchone()
 
     if row is None:
         return redirect("/admin")
@@ -758,127 +719,110 @@ def confirm_shift(shift_id):
     return render_template("confirm_shift.html", shift=shift)
 
 @app.route("/confirm_shift/<int:shift_id>", methods=["POST"])
+@admin_required
 def confirm_shift_post(shift_id):
-    if "user_id" not in session:
-        return redirect("/login")
+    """
+    管理者がシフトを確定する
+    """
+    date = request.form.get("date")
+    time = request.form.get("time")
+    end_time = request.form.get("end_time")
 
-    if not is_admin():
-        return redirect("/")
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
 
-    date = request.form["date"]
-    time = request.form["time"]
-    end_time = request.form["end_time"]
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT shifts.user_id,
-               users.username
-        FROM shifts
-        JOIN users
-        ON shifts.user_id = users.id
-        WHERE shifts.id = ?
-        """,
-        (shift_id,)
-    )
-
-    shift = cursor.fetchone()
-
-    if shift is None:
-        conn.close()
-        return redirect("/admin")
-
-    cursor.execute(
-        """
-        SELECT COUNT(*)
-        FROM confirmed_shifts
-        WHERE user_id = ?
-          AND date = ?
-          AND time = ?
-          AND end_time = ?
-        """,
-        (
-            shift[0],
-            date,
-            time,
-            end_time
+        cursor.execute(
+            """
+            SELECT shifts.user_id,
+                   users.username
+            FROM shifts
+            JOIN users
+            ON shifts.user_id = users.id
+            WHERE shifts.id = ?
+            """,
+            (shift_id,),
         )
-    )
+        shift = cursor.fetchone()
 
-    result = cursor.fetchone()
+        if shift is None:
+            return redirect("/admin")
 
-    if result[0] > 0:
-        conn.close()
-        return redirect("/confirmed_shifts")
-
-    cursor.execute(
-        """
-        INSERT INTO confirmed_shifts (
-            user_id,
-            username,
-            date,
-            time,
-            end_time
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM confirmed_shifts
+            WHERE user_id = ?
+              AND date = ?
+              AND time = ?
+              AND end_time = ?
+            """,
+            (shift[0], date, time, end_time),
         )
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (
-            shift[0],
-            shift[1],
-            date,
-            time,
-            end_time
-        ),
-    )
-    
-    cursor.execute(
-        """
-        DELETE FROM shifts
-        WHERE id = ?
-        """,
-        (shift_id,)
-    )
+        result = cursor.fetchone()
 
-    conn.commit()
-    conn.close()
+        if result[0] > 0:
+            return redirect("/confirmed_shifts")
+
+        cursor.execute(
+            """
+            INSERT INTO confirmed_shifts (
+                user_id,
+                username,
+                date,
+                time,
+                end_time
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (shift[0], shift[1], date, time, end_time),
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM shifts
+            WHERE id = ?
+            """,
+            (shift_id,),
+        )
+
+        conn.commit()
 
     return redirect("/admin")
 @app.route("/confirmed_shifts")
+@admin_required
 def confirmed_shifts():
-    if "user_id" not in session:
-        return redirect("/login")
+    """
+    確定済みシフト一覧を表示する
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
 
-    if not is_admin():
-        return redirect("/")
+        cursor.execute(
+            """
+            SELECT id, user_id, username, date, time, end_time
+            FROM confirmed_shifts
+            ORDER BY date
+            """
+        )
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # 確定済みシフトを日付順で取得
-    cursor.execute(
-        """
-        SELECT id, user_id, username, date, time, end_time
-        FROM confirmed_shifts
-        ORDER BY date
-        """
-    )
+        rows = cursor.fetchall()
 
     shifts = [
-    {
-        "id": row[0],
-        "user_id": row[1],
-        "username": row[2],
-        "date": row[3],
-        "time": row[4],
-        "end_time": row[5],
-    }
-    for row in cursor.fetchall()
-]
+        {
+            "id": row[0],
+            "user_id": row[1],
+            "username": row[2],
+            "date": row[3],
+            "time": row[4],
+            "end_time": row[5],
+        }
+        for row in rows
+    ]
 
-    conn.close()
-
-    return render_template("confirmed_shifts.html", shifts=shifts)
+    return render_template(
+        "confirmed_shifts.html",
+        shifts=shifts,
+    )
 
 @app.route("/my_confirmed_shifts")
 def my_confirmed_shifts():
