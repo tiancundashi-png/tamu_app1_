@@ -10,7 +10,7 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database import DATABASE, get_db_connection
-from routes.auth import auth_bp
+from routes.auth import auth_bp, login_required, admin_required, is_admin
 
 
 
@@ -112,38 +112,8 @@ init_db()
 
 from functools import wraps
 
-def login_required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        user_id = session.get("user_id")
 
-        if user_id is None:
-            return redirect("/login")
 
-        return func(*args, **kwargs)
-
-    return wrapper
-
-def admin_required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        user_id = session.get("user_id")
-
-        if user_id is None:
-            return redirect("/login")
-
-        if not is_admin():
-            return redirect("/")
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-def is_admin():
-    """
-    ログイン中のユーザーが管理者かどうかを判定する
-    """
-    return session.get("role") == "admin"
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def home():

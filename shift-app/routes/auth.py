@@ -1,11 +1,42 @@
+from functools import wraps
 import sqlite3
 
 from flask import Blueprint, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from database import get_db_connection
-
 auth_bp = Blueprint("auth", __name__)
+
+def is_admin():
+    """
+    ログイン中のユーザーが管理者かどうかを判定する
+    """
+    return session.get("role") == "admin"
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/login")
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/login")
+
+        if not is_admin():
+            return redirect("/")
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 
