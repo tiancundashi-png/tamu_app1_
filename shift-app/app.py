@@ -112,131 +112,12 @@ init_db()
 
 
 
-@app.route("/manager")
-def manager():
-    # ログインしていない場合
-    if "user_id" not in session:
-        return redirect("/login")
-    # 管理者でない場合
-    if not is_admin():
-        return redirect("/")
-
-    return "管理者ページ"
 
 
-@app.route("/users")
-def users():
 
-    if "user_id" not in session:
-        return redirect("/login")
 
-    if not is_admin():
-        return redirect("/")
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT id, username, role
-        FROM users
-        ORDER BY id
-        """
-    )
-
-    users = [
-        {
-            "id": row[0],
-            "username": row[1],
-            "role": row[2],
-        }
-        for row in cursor.fetchall()
-    ]
-
-    conn.close()
-
-    return render_template("users.html", users=users)
-
-@app.route("/delete_user_confirm/<int:user_id>")
-def delete_user_confirm(user_id):
-
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT id, username, role FROM users WHERE id = ?",
-        (user_id,)
-    )
-
-    user = cursor.fetchone()
-    conn.close()
-
-    if user is None:
-        return redirect("/users")
-
-    if user[2] == "admin":
-        return redirect("/users")
-
-    user_data = {
-        "id": user[0],
-        "username": user[1],
-        "role": user[2],
-    }
-
-    return render_template("delete_user_confirm.html", user=user_data)
-
-@app.route("/delete_user/<int:user_id>", methods=["POST"])
-def delete_user(user_id):
-
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT role FROM users WHERE id = ?",
-        (user_id,)
-    )
-
-    user = cursor.fetchone()
-
-    if user is None:
-        conn.close()
-        return redirect("/users")
-
-    if user[0] == "admin":
-        conn.close()
-        return redirect("/users")
-
-    cursor.execute(
-        "DELETE FROM shifts WHERE user_id = ?",
-        (user_id,)
-    )
-
-    cursor.execute(
-        "DELETE FROM confirmed_shifts WHERE user_id = ?",
-        (user_id,)
-    )
-
-    cursor.execute(
-        "DELETE FROM users WHERE id = ?",
-        (user_id,)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return redirect("/users")
 @app.route("/backup")
 def backup_db():
     if "user_id" not in session:
@@ -330,39 +211,7 @@ def delete_backup(filename):
     return redirect("/backup_list")
 
 
-@app.route("/my_confirmed_shifts")
-def my_confirmed_shifts():
 
-    if "user_id" not in session:
-        return redirect("/login")
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # ログイン中のユーザーの確定済みシフトのみ取得
-    cursor.execute(
-        """
-        SELECT id, username, date, time, end_time
-        FROM confirmed_shifts
-        WHERE user_id = ?
-        ORDER BY date
-        """,
-        (session["user_id"],)
-    )
-
-    shifts = [
-        {
-            "id": row[0],
-            "username": row[1],
-            "date": row[2],
-            "time": row[3],
-            "end_time": row[4],
-        }
-        for row in cursor.fetchall()
-    ]
-
-    conn.close()
-
-    return render_template("my_confirmed_shifts.html", shifts=shifts)
 
 @app.route("/unconfirm_shift/<int:id>", methods=["POST"])
 def unconfirm_shift(id):

@@ -164,3 +164,40 @@ def delete(id):
         conn.commit()
 
     return redirect("/")
+
+@shift_bp.route("/my_confirmed_shifts")
+@login_required
+def my_confirmed_shifts():
+    """
+    ログイン中のユーザー自身の確定済みシフトを表示する
+    """
+    user_id = session.get("user_id")
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, username, date, time, end_time
+            FROM confirmed_shifts
+            WHERE user_id = ?
+            ORDER BY date
+            """,
+            (user_id,),
+        )
+        rows = cursor.fetchall()
+
+    shifts = [
+        {
+            "id": row[0],
+            "username": row[1],
+            "date": row[2],
+            "time": row[3],
+            "end_time": row[4],
+        }
+        for row in rows
+    ]
+
+    return render_template(
+        "my_confirmed_shifts.html",
+        shifts=shifts,
+    )

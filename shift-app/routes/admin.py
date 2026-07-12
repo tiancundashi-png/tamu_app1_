@@ -227,3 +227,113 @@ def confirmed_shifts():
         "confirmed_shifts.html",
         shifts=shifts,
     )
+
+@admin_bp.route("/users")
+@admin_required
+def users():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT id, username, role
+            FROM users
+            ORDER BY id
+            """
+        )
+
+        users = [
+            {
+                "id": row[0],
+                "username": row[1],
+                "role": row[2],
+            }
+            for row in cursor.fetchall()
+        ]
+
+    return render_template("users.html", users=users)
+
+@admin_bp.route("/delete_user_confirm/<int:user_id>")
+@admin_required
+def delete_user_confirm(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT id, username, role
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        )
+
+        user = cursor.fetchone()
+
+    if user is None:
+        return redirect("/users")
+
+    if user[2] == "admin":
+        return redirect("/users")
+
+    user_data = {
+        "id": user[0],
+        "username": user[1],
+        "role": user[2],
+    }
+
+    return render_template(
+        "delete_user_confirm.html",
+        user=user_data,
+    )
+    
+@admin_bp.route("/delete_user/<int:user_id>", methods=["POST"])
+@admin_required
+def delete_user(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT role
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        )
+
+        user = cursor.fetchone()
+
+        if user is None:
+            return redirect("/users")
+
+        if user[0] == "admin":
+            return redirect("/users")
+
+        cursor.execute(
+            """
+            DELETE FROM shifts
+            WHERE user_id = ?
+            """,
+            (user_id,),
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM confirmed_shifts
+            WHERE user_id = ?
+            """,
+            (user_id,),
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        )
+
+        conn.commit()
+
+    return redirect("/users")
