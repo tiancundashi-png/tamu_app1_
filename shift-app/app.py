@@ -1,6 +1,4 @@
-from functools import wraps
 import os
-import secrets
 import shutil
 import sqlite3
 from datetime import datetime, timedelta
@@ -104,17 +102,8 @@ def init_db():
 
         conn.commit()
 
-def get_db_connection():
-    """
-    データベース接続を返す共通関数
-    """
-    return sqlite3.connect(DATABASE)
-
 
 init_db()
-
-from functools import wraps
-
 
 
 
@@ -248,8 +237,6 @@ def delete_user(user_id):
     conn.close()
 
     return redirect("/users")
-
-
 @app.route("/backup")
 def backup_db():
     if "user_id" not in session:
@@ -343,10 +330,6 @@ def delete_backup(filename):
     return redirect("/backup_list")
 
 
-
-
-
-
 @app.route("/my_confirmed_shifts")
 def my_confirmed_shifts():
 
@@ -407,6 +390,7 @@ def unconfirm_shift(id):
 
     return redirect("/confirmed_shifts")
 
+
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template("404.html"), 404
@@ -414,7 +398,6 @@ def page_not_found(error):
 @app.errorhandler(500)
 def internal_server_error(error):
     return render_template("500.html"), 500
-
 
 
 if __name__ == "__main__":
