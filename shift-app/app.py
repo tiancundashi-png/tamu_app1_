@@ -118,97 +118,14 @@ init_db()
 
 
 
-@app.route("/backup")
-def backup_db():
-    if "user_id" not in session:
-        return redirect("/login")
 
-    if not is_admin():
-        return redirect("/")
 
-    # データバックアップを作成するためのディレクトリを作成
-    os.makedirs(BACKUP_DIR, exist_ok=True)
-
-    now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_filename = f"shift_backup_{now}.db"
-    backup_path = os.path.join(BACKUP_DIR, backup_filename)
-
-    shutil.copy(DATABASE, backup_path)
-
-    return f"バックアップを作成しました: {backup_filename}"
-
-@app.route("/backup_list")
-def backup_list():
-
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-
-    files = os.listdir(BACKUP_DIR)
-
-    files.sort(reverse=True)
-
-    return render_template(
-        "backup_list.html",
-        files=files
-    )
     
-@app.route("/restore_confirm/<filename>")
-def restore_confirm(filename):
 
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-
-    return render_template(
-        "restore_confirm.html",
-        filename=filename
-    )
     
-@app.route("/restore_backup/<filename>", methods=["POST"])
-def restore_backup(filename):
 
-    if "user_id" not in session:
-        return redirect("/login")
 
-    if not is_admin():
-        return redirect("/")
 
-    backup_path = os.path.join(BACKUP_DIR, filename)
-
-    if not os.path.exists(backup_path):
-        return redirect("/backup_list")
-
-    before_restore_filename = "before_restore_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".db"
-    before_restore_path = os.path.join(BACKUP_DIR, before_restore_filename)
-
-    shutil.copy(DATABASE, before_restore_path)
-
-    shutil.copy(backup_path, DATABASE)
-
-    return redirect("/backup_list")
-
-@app.route("/delete_backup/<filename>", methods=["POST"])
-def delete_backup(filename):
-
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if not is_admin():
-        return redirect("/")
-
-    backup_path = os.path.join(BACKUP_DIR, filename)
-
-    if not os.path.exists(backup_path):
-        return redirect("/backup_list")
-
-    os.remove(backup_path)
-
-    return redirect("/backup_list")
 
 
 

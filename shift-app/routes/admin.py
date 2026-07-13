@@ -1,9 +1,14 @@
 from flask import Blueprint, redirect, render_template, request
-
+import os
+import shutil
+from datetime import datetime
+from database import DATABASE
 from database import get_db_connection
 from routes.auth import admin_required
 
 admin_bp = Blueprint("admin", __name__)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BACKUP_DIR = os.path.join(BASE_DIR, "backups")
 
 @admin_bp.route("/admin")
 @admin_required
@@ -337,3 +342,82 @@ def delete_user(user_id):
         conn.commit()
 
     return redirect("/users")
+
+@admin_bp.route("/backup")
+@admin_required
+def backup_db():
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_filename = f"shift_backup_{now}.db"
+    backup_path = os.path.join(BACKUP_DIR, backup_filename)
+
+    shutil.copy(DATABASE, backup_path)
+
+    return f"バックアップを作成しました: {backup_filename}"
+
+@admin_bp.route("/backup_list")
+@admin_required
+def backup_list():
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+
+    files = os.listdir(BACKUP_DIR)
+    files.sort(reverse=True)
+
+    return render_template(
+        "backup_list.html",
+        files=files,
+    )
+    
+@admin_bp.route("/restore_confirm/<filename>")
+@admin_required
+def restore_confirm(filename):
+    return render_template(
+        "restore_confirm.html",
+        filename=filename,
+    )
+    
+@admin_bp.route("/restore_backup/<filename>", methods=["POST"])
+@admin_required
+def restore_backup(filename):
+    safe_filename = os.path.basename(filename)
+
+    if safe_filename != filename:
+        return redirect("/backup_list")
+
+    backup_path = os.path.join(BACKUP_DIR, safe_filename)
+
+    if not os.path.isfile(backup_path):
+        return redirect("/backup_list")
+
+    before_restore_filename = (
+        "before_restore_"
+        + datetime.now().strftime("%Y%m%d_%H%M%S")
+        + ".db"
+    )
+    before_restore_path = os.path.join(
+        BACKUP_DIR,
+        before_restore_filename,
+    )
+
+    shutil.copy2(DATABASE, before_restore_path)
+    shutil.copy2(backup_path, DATABASE)
+
+    return redirect("/backup_list")
+
+@admin_bp.route("/delete_backup/<filename>", methods=["POST"])
+@admin_required
+def delete_backup(filename):
+    safe_filename = os.path.basename(filename)
+
+    if safe_filename != filename:
+        return redirect("/backup_list")
+
+    backup_path = os.path.join(BACKUP_DIR, safe_filename)
+
+    if not os.path.isfile(backup_path):
+        return redirect("/backup_list")
+
+    os.remove(backup_path)
+
+    return redirect("/backup_list")
